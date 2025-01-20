@@ -1,14 +1,9 @@
 package com.yuramoroz.spring_crm_system.repository.impl;
 
 import com.yuramoroz.spring_crm_system.entity.Trainee;
-import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

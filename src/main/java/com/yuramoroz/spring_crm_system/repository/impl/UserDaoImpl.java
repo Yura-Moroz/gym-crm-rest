@@ -103,12 +103,4 @@ public abstract class UserDaoImpl<T extends User> implements UserDao<T> {
         return counter > 0;
     }
 
-    @Override
-    public void deleteByUsername(String username) {
-        log.info("Deleting user by username");
-        if (ifUserExistByUsername(username)) {
-            T user = getUserByUsername(username).get();
-            delete(user);
-        }
-    }
 }

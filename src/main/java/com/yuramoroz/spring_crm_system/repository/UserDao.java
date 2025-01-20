@@ -8,4 +8,11 @@ public interface UserDao<T extends User> extends BaseDao<T> {
     public Optional<T> getUserByUsername(String username);
 
     public boolean ifUserExistByUsername(String username);
+
+    public T update(T entity);
+
+    public void deleteByUsername(String username);
+
+    public void delete(T entity);
+
 }

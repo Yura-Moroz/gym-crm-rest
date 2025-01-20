@@ -4,21 +4,24 @@ import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.repository.impl.UserDaoImpl;
 import com.yuramoroz.spring_crm_system.utils.ProfileUtils;
 import com.yuramoroz.spring_crm_system.validation.PasswordValidator;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public abstract class BaseUserService<T extends User> {
 
     private final UserDaoImpl<T> userDao;
 
+    public BaseUserService(UserDaoImpl<T> userDao) {
+        this.userDao = userDao;
+    }
+
     public T saveUser(T user) {
-        log.info("Trying to save {} {} user...", user.getFirstName(), user.getLastName());
+        log.info("Trying to save user...");
 
         if (user == null) throw new IllegalArgumentException("Expected User but no proper data was provided");
 
@@ -49,7 +52,7 @@ public abstract class BaseUserService<T extends User> {
     }
 
     public void changeUserPassword(T user, String oldPassword, String newPassword) {
-        log.info("Trying to change password in {} {} user", user.getFirstName(), user.getLastName());
+        log.info("Trying to change password in user");
 
         boolean approvedPass = PasswordValidator.ifPasswordMatches(oldPassword, user.getPassword());
 
@@ -58,13 +61,13 @@ public abstract class BaseUserService<T extends User> {
             user.setPassword(PasswordValidator.hashPassword(newPassword));
             updateUser(user);
 
-            log.info("The new password was successfully set to {} {} user", user.getFirstName(), user.getLastName());
+            log.info("The new password was successfully set to user");
 
         } else log.warn("Sorry... It seems that you've provided a wrong password...");
     }
 
     public T updateUser(T user) {
-        log.info("Updating {} {} user", user.getFirstName(), user.getLastName());
+        log.info("Updating user");
         if (userDao.ifExistById(user.getId())) {
             return userDao.update(user);
         } else {
@@ -73,13 +76,13 @@ public abstract class BaseUserService<T extends User> {
     }
 
     public void deactivateUser(T user) {
-        log.info("Deactivating {} {} profile", user.getFirstName(), user.getLastName());
+        log.info("Deactivating user profile");
 
         user.setActive(false);
     }
 
     public void activateUser(T user) {
-        log.info("Activating {} {} profile", user.getFirstName(), user.getLastName());
+        log.info("Activating user profile");
 
         user.setActive(true);
     }

@@ -44,6 +44,7 @@ public class TraineeServiceTest {
                 .lastName("Doe")
                 .password("password123")
                 .address("123 Street")
+                .userName("John.Doe")
                 .dateOfBirth(LocalDate.of(1990, 1, 1))
                 .build();
     }
@@ -185,6 +186,17 @@ public class TraineeServiceTest {
         traineeService.deactivateUser(trainee);
 
         assertFalse(trainee.isActive());
+    }
+
+    @Test
+    void deleteTraineeByUsernameTest(){
+        when(traineeDao.ifUserExistByUsername(trainee.getUserName())).thenReturn(true);
+        when(traineeDao.getUserByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
+
+        traineeService.deleteUserByUsername(trainee.getUserName());
+
+        verify(traineeDao, times(1)).ifUserExistByUsername(trainee.getUserName());
+        verify(traineeDao, times(1)).getUserByUsername(trainee.getUserName());
     }
 
     @Test

@@ -11,10 +11,6 @@ public interface BaseDao<T> {
 
     public T save(T entity);
 
-    public T update(T entity);
-
-    public void delete(T entity);
-
     public boolean ifExistById(long id);
 
 }

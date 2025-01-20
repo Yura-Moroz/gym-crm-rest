@@ -36,9 +36,4 @@ public class Trainee extends User {
     @Column(name = "trainings")
     private List<Training> trainings = new ArrayList<>();
 
-    public Trainee(String firstName, String lastName, Boolean isActive, String address, LocalDate dateOfBirth) {
-        super(firstName, lastName, isActive);
-        this.address = address;
-        this.dateOfBirth = dateOfBirth;
-    }
 }

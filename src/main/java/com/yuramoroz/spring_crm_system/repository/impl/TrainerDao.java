@@ -3,14 +3,12 @@ package com.yuramoroz.spring_crm_system.repository.impl;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Slf4j

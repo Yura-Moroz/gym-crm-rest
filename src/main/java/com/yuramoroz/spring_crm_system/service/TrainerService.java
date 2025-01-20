@@ -15,6 +15,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class TrainerService extends BaseUserService<Trainer> {
+
     @Autowired
     private final TrainerDao trainerDao;
 

@@ -26,8 +26,4 @@ public class Trainer extends User{
     @Column(name = "specialization")
     private String specialization;
 
-    public Trainer(String firstName, String lastName, Boolean isActive, String specialization) {
-        super(firstName, lastName, isActive);
-        this.specialization = specialization;
-    }
 }

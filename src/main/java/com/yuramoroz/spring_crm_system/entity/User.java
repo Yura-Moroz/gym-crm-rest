@@ -39,9 +39,4 @@ public abstract class User {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    public User(String firstName, String lastName, Boolean active) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.active = active;
-    }
 }

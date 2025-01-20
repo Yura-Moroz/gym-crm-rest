@@ -1,6 +1,7 @@
 package com.yuramoroz.spring_crm_system.repository.impl;
 
 import com.yuramoroz.spring_crm_system.entity.Training;
+import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.repository.BaseDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,16 +45,7 @@ public class TrainingDao implements BaseDao<Training> {
     @Transactional
     public Training save(Training training) {
         log.info("Trying to save a training to the DB");
-
-        try {
-            if (training.getId() == null) {
-                entityManager.persist(training);
-            } else {
-                log.warn("Cannot save an empty Training");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Something went wrong went trying to save a training to the DB");
-        }
+        entityManager.persist(training);
         return training;
     }
 
@@ -62,14 +55,25 @@ public class TrainingDao implements BaseDao<Training> {
         return entityManager.find(Training.class, id) != null;
     }
 
-    @Override
-    public Training update(Training training) {
-        throw new NotImplementedException("This update method shouldn't be implemented");
-    }
+    public List<Training> getTrainingsByCriteria(String username, LocalDate dateFrom, LocalDate dateTo,
+                                                 String trainerName, TrainingType trainingType){
+        log.info("Trying to get trainings by criteria from DB");
 
-    @Override
-    public void delete(Training training) {
-        throw new NotImplementedException("This delete method shouldn't be implemented");
-    }
+        String jpql = """
+               SELECT t FROM Training t WHERE t.trainee.userName = :username
+               AND t.trainingDate >= :dateFrom AND t.trainingDate <= :dateTo
+               AND (t.trainer.firstName = :trainerName OR t.trainer.lastName = :trainerName)
+               AND t.trainingType = :trainingType
+               """;
 
+        Query query = entityManager.createQuery(jpql);
+        query.setParameter("username", username);
+        query.setParameter("dateFrom", dateFrom.atTime(0, 0, 0));
+        query.setParameter("dateTo", dateTo.atTime(23, 59, 59));
+        query.setParameter("trainerName", trainerName);
+        query.setParameter("trainingType", trainingType);
+
+        List<Training> trainings = query.getResultList();
+        return trainings.isEmpty() ? new ArrayList<>() : trainings;
+    }
 }

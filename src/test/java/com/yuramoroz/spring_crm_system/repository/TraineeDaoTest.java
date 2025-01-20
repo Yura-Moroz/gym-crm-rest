@@ -64,7 +64,7 @@ public class TraineeDaoTest {
         traineeDao.delete(trainee);
         resultTrainee = traineeDao.getById(trainee.getId());
 
-        assertEquals(Optional.empty(), resultTrainee);
+        assertTrue(resultTrainee.isEmpty());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class TraineeDaoTest {
 
         resultTrainee = traineeDao.getById(trainee.getId());
 
-        assertEquals(Optional.empty(), resultTrainee);
+        assertTrue(resultTrainee.isEmpty());
     }
 
     @Test

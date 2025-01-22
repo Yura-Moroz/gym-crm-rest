@@ -19,11 +19,7 @@ import java.util.List;
 @Table(name = "trainers")
 public class Trainer extends User{
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @Column(name = "specialization")
+    @Column(name = "specialization", nullable = false)
     private String specialization;
 
 }

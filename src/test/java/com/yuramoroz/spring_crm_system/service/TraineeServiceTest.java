@@ -1,21 +1,14 @@
 package com.yuramoroz.spring_crm_system.service;
 
-import com.yuramoroz.spring_crm_system.config.TestConfig;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
-import com.yuramoroz.spring_crm_system.entity.Training;
-import com.yuramoroz.spring_crm_system.enums.TrainingType;
-import com.yuramoroz.spring_crm_system.repository.impl.TraineeDao;
-import com.yuramoroz.spring_crm_system.validation.PasswordValidator;
+import com.yuramoroz.spring_crm_system.repository.TraineeDao;
+import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
+import com.yuramoroz.spring_crm_system.validation.PasswordManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,15 +16,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
 public class TraineeServiceTest {
 
     @Mock
     private TraineeDao traineeDao;
 
     @InjectMocks
-    private TraineeService traineeService;
+    private TraineeServiceImpl traineeService;
 
     private Trainee trainee;
 
@@ -52,28 +43,26 @@ public class TraineeServiceTest {
     @Test
     void saveTraineeWithMultiParam_shouldSaveTraineeSuccessfully() {
 
-        when(traineeDao.ifUserExistByUsername(anyString())).thenReturn(false);
+        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
         when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
 
-        Trainee savedTrainee = traineeService.saveTrainee(
-                "John", "Doe", "password123", "123 Street", LocalDate.of(1990, 1, 1));
+        Trainee savedTrainee = traineeService.save(
+                "Matt", "Watson", "qwerty123", "456 Street", LocalDate.of(1980, 6, 19));
 
-        assertNotNull(savedTrainee);
-        assertEquals("John", savedTrainee.getFirstName());
-        verify(traineeDao, times(1)).ifUserExistByUsername(anyString());
+        assertEquals("John.Doe", savedTrainee.getUserName());
+        verify(traineeDao, times(1)).ifExistByUsername(anyString());
         verify(traineeDao, times(1)).save(any(Trainee.class));
     }
 
     @Test
     void saveTraineeWithOneParam_shouldSaveTraineeSuccessfully() {
-        when(traineeDao.ifUserExistByUsername(anyString())).thenReturn(false);
+        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
         when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
 
-        Trainee resultTrainee = traineeService.saveUser(trainee);
+        Trainee savedTrainee = traineeService.save(trainee);
 
-        assertNotNull(resultTrainee);
-        assertEquals("John", resultTrainee.getFirstName());
-        verify(traineeDao, times(1)).ifUserExistByUsername(anyString());
+        assertEquals("John.Doe", savedTrainee.getUserName());
+        verify(traineeDao, times(1)).ifExistByUsername(anyString());
         verify(traineeDao, times(1)).save(any(Trainee.class));
     }
 
@@ -82,61 +71,50 @@ public class TraineeServiceTest {
         when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
         when(traineeDao.getById(trainee.getId())).thenReturn(Optional.of(trainee));
 
-        Trainee resultTrainee = (Trainee) traineeService.selectUserById(trainee.getId());
+        Trainee resultTrainee = (Trainee) traineeService.selectById(trainee.getId());
 
-        assertNotNull(resultTrainee);
-        assertEquals(resultTrainee, trainee);
+        assertNotNull(resultTrainee.getId());
+        assertEquals(resultTrainee.getFirstName(), trainee.getFirstName());
+        assertEquals(resultTrainee.getLastName(), trainee.getLastName());
+        assertEquals(resultTrainee.getAddress(), trainee.getAddress());
+        assertEquals(resultTrainee.getDateOfBirth(), trainee.getDateOfBirth());
+        assertEquals(resultTrainee.getUserName(), trainee.getUserName());
+        assertEquals(resultTrainee.getPassword(), trainee.getPassword());
+        assertEquals(resultTrainee.getTrainings(), trainee.getTrainings());
         verify(traineeDao, times(1)).getById(trainee.getId());
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
     }
 
     @Test
     void findByUsernameTest_ShouldReturnExistingUserByUsername() {
-        when(traineeDao.ifUserExistByUsername(trainee.getUserName())).thenReturn(true);
-        when(traineeDao.getUserByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
+        when(traineeDao.ifExistByUsername(trainee.getUserName())).thenReturn(true);
+        when(traineeDao.getByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
 
-        Trainee resultTrainee = (Trainee) traineeService.selectUserByUsername(trainee.getUserName());
+        Trainee resultTrainee = (Trainee) traineeService.selectByUsername(trainee.getUserName());
 
-        assertNotNull(resultTrainee);
-        assertEquals(resultTrainee, trainee);
-        verify(traineeDao, times(1)).ifUserExistByUsername(trainee.getUserName());
-        verify(traineeDao, times(1)).getUserByUsername(trainee.getUserName());
-    }
-
-    @Test
-    void getTrainingsByCriteria_shouldReturnTrainings() {
-        String username = "johndoe";
-        LocalDate dateFrom = LocalDate.of(2023, 1, 1);
-        LocalDate dateTo = LocalDate.of(2023, 12, 31);
-        String trainerName = "Jane";
-        TrainingType trainingType = TrainingType.BOXES;
-
-        Training training = Training.builder()
-                .trainingDate(LocalDateTime.of(2023, 6, 15, 16, 15, 0))
-                .trainingType(trainingType)
-                .build();
-
-        when(traineeDao.ifUserExistByUsername(username)).thenReturn(true);
-        when(traineeDao.getTrainingsByCriteria(username, dateFrom, dateTo, trainerName, trainingType))
-                .thenReturn(List.of(training));
-
-        List<Training> trainings = traineeService.getTrainingsByCriteria(username, dateFrom, dateTo, trainerName, trainingType);
-
-        assertTrue(trainings.size() > 0);
-        assertEquals(trainingType, trainings.get(0).getTrainingType());
+        assertNotNull(resultTrainee.getId());
+        assertEquals(resultTrainee.getFirstName(), trainee.getFirstName());
+        assertEquals(resultTrainee.getLastName(), trainee.getLastName());
+        assertEquals(resultTrainee.getAddress(), trainee.getAddress());
+        assertEquals(resultTrainee.getDateOfBirth(), trainee.getDateOfBirth());
+        assertEquals(resultTrainee.getUserName(), trainee.getUserName());
+        assertEquals(resultTrainee.getPassword(), trainee.getPassword());
+        assertEquals(resultTrainee.getTrainings(), trainee.getTrainings());
+        verify(traineeDao, times(1)).ifExistByUsername(trainee.getUserName());
+        verify(traineeDao, times(1)).getByUsername(trainee.getUserName());
     }
 
     @Test
     void deleteTraineeByUsername_shouldDeleteUserIfExists() {
         String username = "johndoe";
-        Trainee trainee = Trainee.builder().userName(username).build();
+        Trainee resultTrainee = Trainee.builder().userName(username).build();
 
-        when(traineeDao.ifUserExistByUsername(username)).thenReturn(true);
-        when(traineeDao.getUserByUsername(username)).thenReturn(Optional.of(trainee));
+        when(traineeDao.ifExistByUsername(username)).thenReturn(true);
+        when(traineeDao.getByUsername(username)).thenReturn(Optional.of(resultTrainee));
 
-        traineeService.deleteUserByUsername(username);
+        traineeService.deleteByUsername(username);
 
-        verify(traineeDao, times(1)).delete(trainee);
+        verify(traineeDao, times(1)).delete(resultTrainee);
 
     }
 
@@ -144,16 +122,16 @@ public class TraineeServiceTest {
     void deleteTraineeByUsername_shouldLogWarningIfUserNotFound() {
         String username = "@nonexistent";
 
-        when(traineeDao.ifUserExistByUsername(username)).thenReturn(false);
+        when(traineeDao.ifExistByUsername(username)).thenReturn(false);
 
-        traineeService.deleteUserByUsername(username);
+        traineeService.deleteByUsername(username);
 
         verify(traineeDao, never()).delete(any());
     }
 
     @Test
     void deleteTraineeByUserArgument() {
-        traineeService.deleteUser(trainee);
+        traineeService.delete(trainee);
 
         verify(traineeDao, times(1)).delete(trainee);
     }
@@ -163,9 +141,16 @@ public class TraineeServiceTest {
         when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
         when(traineeDao.update(trainee)).thenReturn(trainee);
 
-        Trainee updatedTrainee = traineeService.updateUser(trainee);
+        Trainee updatedTrainee = traineeService.update(trainee);
 
-        assertNotNull(updatedTrainee);
+        assertNotNull(updatedTrainee.getId());
+        assertEquals(updatedTrainee.getFirstName(), trainee.getFirstName());
+        assertEquals(updatedTrainee.getLastName(), trainee.getLastName());
+        assertEquals(updatedTrainee.getAddress(), trainee.getAddress());
+        assertEquals(updatedTrainee.getDateOfBirth(), trainee.getDateOfBirth());
+        assertEquals(updatedTrainee.getUserName(), trainee.getUserName());
+        assertEquals(updatedTrainee.getPassword(), trainee.getPassword());
+        assertEquals(updatedTrainee.getTrainings(), trainee.getTrainings());
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
         verify(traineeDao, times(1)).update(trainee);
     }
@@ -174,7 +159,7 @@ public class TraineeServiceTest {
     void activateTraineeProfileTest() {
         trainee.setActive(false);
 
-        traineeService.activateUser(trainee);
+        traineeService.activate(trainee);
 
         assertTrue(trainee.isActive());
     }
@@ -183,20 +168,20 @@ public class TraineeServiceTest {
     void deactivateTraineeProfileTest() {
         trainee.setActive(true);
 
-        traineeService.deactivateUser(trainee);
+        traineeService.deactivate(trainee);
 
         assertFalse(trainee.isActive());
     }
 
     @Test
     void deleteTraineeByUsernameTest(){
-        when(traineeDao.ifUserExistByUsername(trainee.getUserName())).thenReturn(true);
-        when(traineeDao.getUserByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
+        when(traineeDao.ifExistByUsername(trainee.getUserName())).thenReturn(true);
+        when(traineeDao.getByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
 
-        traineeService.deleteUserByUsername(trainee.getUserName());
+        traineeService.deleteByUsername(trainee.getUserName());
 
-        verify(traineeDao, times(1)).ifUserExistByUsername(trainee.getUserName());
-        verify(traineeDao, times(1)).getUserByUsername(trainee.getUserName());
+        verify(traineeDao, times(1)).ifExistByUsername(trainee.getUserName());
+        verify(traineeDao, times(1)).getByUsername(trainee.getUserName());
     }
 
     @Test
@@ -204,21 +189,21 @@ public class TraineeServiceTest {
         String newPassword = "pass123";
         String oldPassword = trainee.getPassword();
 
-        try (MockedStatic<PasswordValidator> mockedStatic = Mockito.mockStatic(PasswordValidator.class)) {
-            mockedStatic.when(() -> PasswordValidator.verify(newPassword)).thenReturn(true);
-            mockedStatic.when(() -> PasswordValidator.ifPasswordMatches(oldPassword, trainee.getPassword())).thenReturn(true);
-            mockedStatic.when(() -> PasswordValidator.hashPassword(newPassword)).thenReturn(newPassword);
+        try (MockedStatic<PasswordManager> mockedStatic = Mockito.mockStatic(PasswordManager.class)) {
+            mockedStatic.when(() -> PasswordManager.verify(newPassword)).thenReturn(true);
+            mockedStatic.when(() -> PasswordManager.ifPasswordMatches(oldPassword, trainee.getPassword())).thenReturn(true);
+            mockedStatic.when(() -> PasswordManager.hashPassword(newPassword)).thenReturn(newPassword);
             when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
             when(traineeDao.update(trainee)).thenReturn(trainee);
 
-            traineeService.changeUserPassword(trainee, oldPassword, newPassword);
+            traineeService.changePassword(trainee, oldPassword, newPassword);
 
             assertEquals(trainee.getPassword(), newPassword);
             verify(traineeDao, times(2)).ifExistById(trainee.getId());
             verify(traineeDao, times(1)).update(trainee);
-            mockedStatic.verify(() -> PasswordValidator.hashPassword(newPassword), times(1));
-            mockedStatic.verify(() -> PasswordValidator.ifPasswordMatches(oldPassword, oldPassword), times(1));
-            mockedStatic.verify(() -> PasswordValidator.verify(newPassword), times(1));
+            mockedStatic.verify(() -> PasswordManager.hashPassword(newPassword), times(1));
+            mockedStatic.verify(() -> PasswordManager.ifPasswordMatches(oldPassword, oldPassword), times(1));
+            mockedStatic.verify(() -> PasswordManager.verify(newPassword), times(1));
         }
     }
 }

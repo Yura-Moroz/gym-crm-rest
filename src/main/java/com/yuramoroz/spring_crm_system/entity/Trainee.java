@@ -21,11 +21,6 @@ import java.util.List;
 @Table(name = "trainees")
 public class Trainee extends User {
 
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "user_id")
-    private User user;
-
     @Column(name = "address")
     private String address;
 

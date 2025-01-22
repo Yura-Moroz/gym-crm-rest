@@ -1,7 +1,7 @@
 package com.yuramoroz.spring_crm_system;
 
 import com.yuramoroz.spring_crm_system.config.AppConfig;
-import com.yuramoroz.spring_crm_system.repository.impl.TraineeDao;
+import com.yuramoroz.spring_crm_system.service.impl.TrainingServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**

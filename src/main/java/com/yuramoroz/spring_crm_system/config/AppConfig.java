@@ -1,5 +1,6 @@
 package com.yuramoroz.spring_crm_system.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -58,4 +59,10 @@ public class AppConfig {
 
         return properties;
     }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
+
 }

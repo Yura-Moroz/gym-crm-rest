@@ -1,33 +1,21 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.entity.Training;
-import com.yuramoroz.spring_crm_system.repository.impl.TrainingDao;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.yuramoroz.spring_crm_system.enums.TrainingType;
 
-import java.util.NoSuchElementException;
+import java.time.LocalDate;
+import java.util.List;
 
+public interface TrainingService {
 
-@Service
-@Slf4j
-public class TrainingService {
+    public Training save(Training training);
 
-    @Autowired
-    private TrainingDao trainingDao;
+    public Training selectById(long id);
 
-    public Training saveTraining(Training training) {
-        log.info("Trying to save training");
-        return trainingDao.save(training);
-    }
+    public List<Training> getTrainingsByTraineeUsernameAndDateRange(
+            String username, LocalDate dateFrom, LocalDate dateTo, String trainerName, TrainingType trainingType);
 
-    public Training selectTrainingById(long id) {
-        log.info("Selecting Training by id: " + id);
-        if (trainingDao.ifExistById(id)) {
-            return trainingDao.getById(id).get();
-        } else {
-            throw new NoSuchElementException("There is no Training with such id: " + id);
-        }
-    }
+    public List<Training> getTrainingsByTrainerUsernameAndDateRange(
+            String username, LocalDate dateFrom, LocalDate dateTo, String trainerName, TrainingType trainingType);
 
 }

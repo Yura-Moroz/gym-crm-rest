@@ -2,7 +2,6 @@ package com.yuramoroz.spring_crm_system.utils;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.function.Function;
 

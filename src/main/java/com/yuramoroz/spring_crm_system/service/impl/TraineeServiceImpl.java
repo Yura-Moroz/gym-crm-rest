@@ -16,6 +16,7 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         super(repository);
     }
 
+    @Override
     public Trainee save(String firstName, String lastName, String password, String address, LocalDate dateOfBirth) {
         log.info("Trying to create and save {} {} trainee...", firstName, lastName);
 
@@ -30,6 +31,7 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         return super.save(trainee);
     }
 
+    @Override
     public void deleteByUsername(String username) {
         log.info("Trying to delete a user by {}", username);
 

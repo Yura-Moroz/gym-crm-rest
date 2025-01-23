@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
@@ -17,6 +18,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
 
     protected final R repository;
 
+    @Override
     @Transactional
     public T save(T user) {
         log.info("Trying to save user...");
@@ -29,42 +31,46 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         return repository.save(user);
     }
 
-    public User selectByUsername(String username) {
+    @Override
+    public Optional<T> getByUsername(String username) {
         log.info("Selecting User by {} username", username);
-
-        if (repository.ifExistByUsername(username)) {
-            return repository.getByUsername(username).get();
-        } else {
-            throw new NoSuchElementException("There was no User found with such username: " + username);
-        }
+        return repository.getByUsername(username);
     }
 
-    public User selectById(long id) {
+    @Override
+    public Optional<T> getById(long id) {
         log.info("Selecting User by id: {}", id);
-
-        if (repository.ifExistById(id)) {
-            return repository.getById(id).get();
-        } else {
-            throw new NoSuchElementException("There was no User found with such id: " + id);
-        }
+        return repository.getById(id);
     }
 
+    @Override
     @Transactional
     public void changePassword(T user, String oldPassword, String newPassword) {
-        log.info("Trying to change password in user");
+
+        if (user == null) {
+            log.warn("Can't change password when user is null");
+            return;
+        }
 
         boolean approvedPass = PasswordManager.ifPasswordMatches(oldPassword, user.getPassword());
+        String resultLog;
 
-        if (approvedPass && PasswordManager.verify(newPassword) && repository.ifExistById(user.getId())) {
-
+        if (!approvedPass) {
+            resultLog = "Sorry, It seems that you provided wrong old password";
+        } else if (!PasswordManager.verify(newPassword)) {
+            resultLog = "Please check that your new password meets all requirements (length should be 4-10 chars)";
+        } else if (!repository.ifExistById(user.getId())) {
+            resultLog = "Sorry, can't change password because provided user doesn't exist...";
+        } else {
             user.setPassword(PasswordManager.hashPassword(newPassword));
             update(user);
-
-            log.info("The new password was successfully set to user");
-
-        } else log.warn("Sorry... It seems that you've provided a wrong password...");
+            resultLog = "New password successfully set to user";
+        }
+        log.info(resultLog);
     }
 
+    @Override
+    @Transactional
     public T update(T user) {
         log.info("Updating user");
         if (repository.ifExistById(user.getId())) {
@@ -74,18 +80,21 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         }
     }
 
+    @Override
     public void deactivate(T user) {
         log.info("Deactivating user profile");
 
         user.setActive(false);
     }
 
+    @Override
     public void activate(T user) {
         log.info("Activating user profile");
 
         user.setActive(true);
     }
 
+    @Override
     public void delete(T user) {
         log.info("Deleting user...");
         repository.delete(user);

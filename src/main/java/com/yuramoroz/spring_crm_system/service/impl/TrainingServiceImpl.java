@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -18,19 +19,16 @@ public class TrainingServiceImpl implements TrainingService {
     @Autowired
     private TrainingDao trainingDao;
 
+    @Override
     public Training save(Training training) {
         log.info("Trying to save training");
         return trainingDao.save(training);
     }
 
-    public Training selectById(long id) {
+    @Override
+    public Optional<Training> selectById(long id) {
         log.info("Selecting Training by id: " + id);
-        if (trainingDao.ifExistById(id)) {
-            return trainingDao.getById(id).get();
-        } else {
-            log.info("There were no Training found with such id: {}", id);
-        }
-        return null;
+        return trainingDao.getById(id);
     }
 
     @Override

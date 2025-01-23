@@ -1,4 +1,4 @@
-package com.yuramoroz.spring_crm_system.dto.mapper;
+package com.yuramoroz.spring_crm_system.mapper;
 
 import com.yuramoroz.spring_crm_system.dto.UserDto;
 import com.yuramoroz.spring_crm_system.entity.User;

@@ -5,12 +5,13 @@ import com.yuramoroz.spring_crm_system.enums.TrainingType;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface TrainingService {
 
     public Training save(Training training);
 
-    public Training selectById(long id);
+    public Optional<Training> selectById(long id);
 
     public List<Training> getTrainingsByTraineeUsernameAndDateRange(
             String username, LocalDate dateFrom, LocalDate dateTo, String trainerName, TrainingType trainingType);

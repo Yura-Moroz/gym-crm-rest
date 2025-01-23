@@ -38,7 +38,7 @@ public class TraineeDaoTest {
     }
 
     @Test
-    public void findByIdTest() {
+    public void getByIdTest() {
         Trainee newTrainee = traineeDao.save(trainee);
 
         Optional<Trainee> resultTrainee = traineeDao.getById(newTrainee.getId());
@@ -46,7 +46,7 @@ public class TraineeDaoTest {
         assertEquals(resultTrainee.get(), trainee);
 
         traineeDao.delete(trainee);
-        resultTrainee = traineeDao.getById(trainee.getId());
+        resultTrainee = traineeDao.getById(newTrainee.getId());
 
         assertTrue(resultTrainee.isEmpty());
     }
@@ -74,7 +74,7 @@ public class TraineeDaoTest {
         newTrainee.setPassword(newPassword);
         newTrainee.setUserName(newUsername);
 
-        newTrainee = traineeDao.update(trainee);
+        newTrainee = traineeDao.update(newTrainee);
 
         assertEquals(newTrainee.getPassword(), newPassword);
         assertEquals(newTrainee.getUserName(), newUsername);
@@ -95,7 +95,7 @@ public class TraineeDaoTest {
 
         Optional<Trainee> resultTrainee = traineeDao.getByUsername(newTrainee.getUserName());
 
-        assertEquals(trainee, resultTrainee.get());
+        assertEquals(newTrainee, resultTrainee.get());
     }
 
     @Test

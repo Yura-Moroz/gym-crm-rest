@@ -55,6 +55,7 @@ public abstract class UserDaoImpl<T extends User> implements UserDao<T> {
     }
 
     @Override
+    @Transactional
     public T update(T entity) {
         log.info("Trying to update an entity in the DB");
         return entityManager.merge(entity);

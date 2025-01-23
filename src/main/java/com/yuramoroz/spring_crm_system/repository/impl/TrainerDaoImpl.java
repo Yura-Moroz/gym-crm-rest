@@ -16,6 +16,7 @@ public class TrainerDaoImpl extends UserDaoImpl<Trainer> implements TrainerDao {
         super(Trainer.class);
     }
 
+    @Override
     public List<Trainer> getUnassignedTrainers(String username) {
         log.info("Trying to get unassigned trainers to trainee by username: {}", username);
 

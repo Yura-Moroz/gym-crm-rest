@@ -10,12 +10,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -32,6 +34,7 @@ public class TrainingDaoTest {
     private TrainerDao trainerDao;
 
     @Test
+    @Transactional
     public void getTrainingsByTraineeUsernameAndDateRangeTest() {
         Trainee trainee = Trainee.builder()
                 .firstName("Bob")
@@ -53,7 +56,7 @@ public class TrainingDaoTest {
         Training training = Training.builder()
                 .trainingName("TestTraining")
                 .trainingDuration(Duration.ofMinutes(60))
-                .trainingDate(LocalDateTime.of(2025, 1, 22, 13, 0))
+                .trainingDate(LocalDateTime.of(2025, 1, 28, 13, 0))
                 .trainingType(TrainingType.BACK_TRAINING)
                 .trainee(trainee)
                 .trainer(trainer)
@@ -64,9 +67,8 @@ public class TrainingDaoTest {
         trainingDao.save(training);
 
         List<Training> trainings = trainingDao.getTrainingsByTraineeUsernameAndDateRange(
-                trainee.getUserName(), LocalDate.now(), LocalDate.of(2025, 1, 31), trainer.getFirstName(), TrainingType.BACK_TRAINING);
+                trainee.getUserName(), LocalDate.now(), LocalDate.of(2025, 3, 27), trainer.getUserName(), TrainingType.BACK_TRAINING);
 
-        assertTrue(trainings.size() > 0);
-        assertTrue(trainings.contains(training));
+        assertThat(trainings).containsExactlyInAnyOrder(training);
     }
 }

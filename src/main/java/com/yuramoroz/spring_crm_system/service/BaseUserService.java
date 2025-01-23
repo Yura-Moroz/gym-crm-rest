@@ -2,13 +2,15 @@ package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 
+import java.util.Optional;
+
 public interface BaseUserService<T extends User> {
 
     public T save(T user);
 
-    public User selectByUsername(String username);
+    public Optional<T> getByUsername(String username);
 
-    public User selectById(long id);
+    public Optional<T> getById(long id);
 
     public void changePassword(T user, String oldPassword, String newPassword);
 

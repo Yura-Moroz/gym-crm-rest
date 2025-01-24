@@ -26,7 +26,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    public Optional<Training> selectById(long id) {
+    public Optional<Training> getById(long id) {
         log.info("Selecting Training by id: " + id);
         return trainingDao.getById(id);
     }

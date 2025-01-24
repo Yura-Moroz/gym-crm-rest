@@ -86,8 +86,8 @@ public class TrainingDaoImpl implements TrainingDao {
 
         Query query = entityManager.createQuery(jpql);
         query.setParameter("trainerLogin", trainerLogin);
-        query.setParameter("dateFrom", dateFrom);
-        query.setParameter("dateTo", dateTo);
+        query.setParameter("dateFrom", dateFrom.atTime(0, 0, 0));
+        query.setParameter("dateTo", dateTo.atTime(23, 59, 59));
         query.setParameter("traineeLogin", traineeLogin);
         query.setParameter("trainingType", trainingType);
 

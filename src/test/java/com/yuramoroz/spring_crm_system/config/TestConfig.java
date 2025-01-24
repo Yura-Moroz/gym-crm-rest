@@ -30,7 +30,7 @@ public class TestConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
         factoryBean.setDataSource(dataSource());
-        factoryBean.setPackagesToScan("com.yuramoroz.spring_crm_system.entity"); // Adjust package name for your entities
+        factoryBean.setPackagesToScan("com.yuramoroz.spring_crm_system.entity");
         factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         factoryBean.setJpaProperties(jpaProperties());
         return factoryBean;
@@ -45,7 +45,7 @@ public class TestConfig {
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        properties.setProperty("hibernate.show_sql", "true"); // For debugging queries in the console
+        properties.setProperty("hibernate.show_sql", "true");
         return properties;
     }
 }

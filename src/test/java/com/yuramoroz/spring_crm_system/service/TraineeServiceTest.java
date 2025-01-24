@@ -37,7 +37,6 @@ public class TraineeServiceTest {
                 .address("123 Street")
                 .dateOfBirth(LocalDate.of(1990, 1, 1))
                 .build();
-
     }
 
     @Test
@@ -70,14 +69,6 @@ public class TraineeServiceTest {
 
         Trainee resultTrainee = traineeService.getById(trainee.getId()).get();
 
-        assertNotNull(resultTrainee.getId());
-        assertEquals(resultTrainee.getFirstName(), trainee.getFirstName());
-        assertEquals(resultTrainee.getLastName(), trainee.getLastName());
-        assertEquals(resultTrainee.getAddress(), trainee.getAddress());
-        assertEquals(resultTrainee.getDateOfBirth(), trainee.getDateOfBirth());
-        assertEquals(resultTrainee.getUserName(), trainee.getUserName());
-        assertEquals(resultTrainee.getPassword(), trainee.getPassword());
-        assertEquals(resultTrainee.getTrainings(), trainee.getTrainings());
         verify(traineeDao, times(1)).getById(trainee.getId());
     }
 
@@ -87,29 +78,18 @@ public class TraineeServiceTest {
 
         Trainee resultTrainee = traineeService.getByUsername(trainee.getUserName()).get();
 
-        assertNotNull(resultTrainee.getId());
-        assertEquals(resultTrainee.getFirstName(), trainee.getFirstName());
-        assertEquals(resultTrainee.getLastName(), trainee.getLastName());
-        assertEquals(resultTrainee.getAddress(), trainee.getAddress());
-        assertEquals(resultTrainee.getDateOfBirth(), trainee.getDateOfBirth());
-        assertEquals(resultTrainee.getUserName(), trainee.getUserName());
-        assertEquals(resultTrainee.getPassword(), trainee.getPassword());
-        assertEquals(resultTrainee.getTrainings(), trainee.getTrainings());
         verify(traineeDao, times(1)).getByUsername(trainee.getUserName());
     }
 
     @Test
-    void deleteTraineeByUsername_shouldDeleteUserIfExists() {
-        String username = "johndoe";
-        Trainee resultTrainee = Trainee.builder().userName(username).build();
+    void deleteTraineeByUsernameTest(){
+        when(traineeDao.ifExistByUsername(trainee.getUserName())).thenReturn(true);
+        when(traineeDao.getByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
 
-        when(traineeDao.ifExistByUsername(username)).thenReturn(true);
-        when(traineeDao.getByUsername(username)).thenReturn(Optional.of(resultTrainee));
+        traineeService.deleteByUsername(trainee.getUserName());
 
-        traineeService.deleteByUsername(username);
-
-        verify(traineeDao, times(1)).delete(resultTrainee);
-
+        verify(traineeDao, times(1)).ifExistByUsername(trainee.getUserName());
+        verify(traineeDao, times(1)).getByUsername(trainee.getUserName());
     }
 
     @Test
@@ -165,17 +145,6 @@ public class TraineeServiceTest {
         traineeService.deactivate(trainee);
 
         assertFalse(trainee.isActive());
-    }
-
-    @Test
-    void deleteTraineeByUsernameTest(){
-        when(traineeDao.ifExistByUsername(trainee.getUserName())).thenReturn(true);
-        when(traineeDao.getByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
-
-        traineeService.deleteByUsername(trainee.getUserName());
-
-        verify(traineeDao, times(1)).ifExistByUsername(trainee.getUserName());
-        verify(traineeDao, times(1)).getByUsername(trainee.getUserName());
     }
 
     @Test

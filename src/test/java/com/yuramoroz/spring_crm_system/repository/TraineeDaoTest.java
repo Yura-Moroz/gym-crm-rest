@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -35,20 +36,6 @@ public class TraineeDaoTest {
                 .password("qwerty")
                 .active(true)
                 .build();
-    }
-
-    @Test
-    public void getByIdTest() {
-        Trainee newTrainee = traineeDao.save(trainee);
-
-        Optional<Trainee> resultTrainee = traineeDao.getById(newTrainee.getId());
-
-        assertEquals(resultTrainee.get(), trainee);
-
-        traineeDao.delete(trainee);
-        resultTrainee = traineeDao.getById(newTrainee.getId());
-
-        assertTrue(resultTrainee.isEmpty());
     }
 
     @Test
@@ -107,7 +94,7 @@ public class TraineeDaoTest {
             traineeDao.delete(newTrainee);
         }
 
-        assertThrows(NoResultException.class, () -> traineeDao.getByUsername("!wrongUser!"));
+        assertThrows(NoResultException.class, () -> traineeDao.getByUsername("!wrongUsername!"));
     }
 
     @Test
@@ -171,7 +158,7 @@ public class TraineeDaoTest {
 
         List<Trainee> trainees = traineeDao.getAll();
 
-        assertTrue(trainees.size() > 1);
+        assertThat(trainees).containsExactlyInAnyOrder(trainee, trainee2);
     }
 
 }

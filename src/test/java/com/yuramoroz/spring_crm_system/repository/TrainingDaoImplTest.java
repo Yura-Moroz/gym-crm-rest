@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
-public class TrainingDaoTest {
+public class TrainingDaoImplTest {
 
     @Autowired
     private TrainingDao trainingDao;

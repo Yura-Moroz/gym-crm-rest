@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
-public class TrainerDaoTest {
+public class TrainerDaoImplTest {
 
     @Autowired
     private TrainerDao trainerDao;
@@ -73,10 +73,10 @@ public class TrainerDaoTest {
         newTrainer.setPassword(newPassword);
         newTrainer.setUserName(newUsername);
 
-        newTrainer = trainerDao.update(newTrainer);
+        Trainer updatedTrainer = trainerDao.update(newTrainer);
 
-        assertEquals(newTrainer.getPassword(), newPassword);
-        assertEquals(newTrainer.getUserName(), newUsername);
+        assertEquals(updatedTrainer.getPassword(), newPassword);
+        assertEquals(updatedTrainer.getUserName(), newUsername);
     }
 
     @Test
@@ -106,7 +106,9 @@ public class TrainerDaoTest {
             trainerDao.delete(newTrainer);
         }
 
-        assertThrows(NoResultException.class, () -> trainerDao.getByUsername("!wrongUsername!"));
+        Optional<Trainer> resultTrainer = trainerDao.getByUsername(wrongUsername);
+
+        assertTrue(resultTrainer.isEmpty());
     }
 
     @Test

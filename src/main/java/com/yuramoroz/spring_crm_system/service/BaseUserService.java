@@ -12,13 +12,13 @@ public interface BaseUserService<T extends User> {
 
     public Optional<T> getById(long id);
 
-    public void changePassword(T user, String oldPassword, String newPassword);
+    public boolean changePassword(T user, String oldPassword, String newPassword);
 
     public T update(T user);
 
-    public void deactivate(T user);
+    public boolean deactivate(T user);
 
-    public void activate(T user);
+    public boolean activate(T user);
 
     public void delete(T user);
 

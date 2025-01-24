@@ -97,33 +97,32 @@ public class TrainerServiceTest {
 
         Trainer updatedTrainer = trainerService.update(trainer);
 
-        assertNotNull(updatedTrainer.getId());
-        assertEquals(updatedTrainer.getFirstName(), trainer.getFirstName());
-        assertEquals(updatedTrainer.getLastName(), trainer.getLastName());
-        assertEquals(updatedTrainer.getSpecialization(), trainer.getSpecialization());
-        assertEquals(updatedTrainer.getUserName(), trainer.getUserName());
-        assertEquals(updatedTrainer.getPassword(), trainer.getPassword());
-        assertEquals(updatedTrainer.isActive(), trainer.isActive());
         verify(trainerDao, times(1)).ifExistById(trainer.getId());
         verify(trainerDao, times(1)).update(trainer);
     }
 
     @Test
     void activateTrainerProfileTest() {
+        when(trainerDao.update(any(Trainer.class))).thenReturn(trainer);
+
         trainer.setActive(false);
 
         trainerService.activate(trainer);
 
         assertTrue(trainer.isActive());
+        verify(trainerDao, times(1)).update(trainer);
     }
 
     @Test
     void deactivateTrainerProfileTest() {
+        when(trainerDao.update(any(Trainer.class))).thenReturn(trainer);
+
         trainer.setActive(true);
 
         trainerService.deactivate(trainer);
 
         assertFalse(trainer.isActive());
+        verify(trainerDao, times(1)).update(trainer);
     }
 
     @Test

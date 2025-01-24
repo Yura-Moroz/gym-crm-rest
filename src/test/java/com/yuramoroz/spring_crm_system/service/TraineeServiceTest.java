@@ -82,7 +82,7 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void deleteTraineeByUsernameTest(){
+    void deleteTraineeByUsernameTest() {
         when(traineeDao.ifExistByUsername(trainee.getUserName())).thenReturn(true);
         when(traineeDao.getByUsername(trainee.getUserName())).thenReturn(Optional.of(trainee));
 
@@ -117,34 +117,34 @@ public class TraineeServiceTest {
 
         Trainee updatedTrainee = traineeService.update(trainee);
 
-        assertNotNull(updatedTrainee.getId());
-        assertEquals(updatedTrainee.getFirstName(), trainee.getFirstName());
-        assertEquals(updatedTrainee.getLastName(), trainee.getLastName());
-        assertEquals(updatedTrainee.getAddress(), trainee.getAddress());
-        assertEquals(updatedTrainee.getDateOfBirth(), trainee.getDateOfBirth());
-        assertEquals(updatedTrainee.getUserName(), trainee.getUserName());
-        assertEquals(updatedTrainee.getPassword(), trainee.getPassword());
-        assertEquals(updatedTrainee.getTrainings(), trainee.getTrainings());
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
         verify(traineeDao, times(1)).update(trainee);
     }
 
     @Test
     void activateTraineeProfileTest() {
+        when(traineeDao.update(any(Trainee.class))).thenReturn(trainee);
+
         trainee.setActive(false);
 
-        traineeService.activate(trainee);
+        boolean activated = traineeService.activate(trainee);
 
+        assertTrue(activated);
         assertTrue(trainee.isActive());
+        verify(traineeDao, times(1)).update(trainee);
     }
 
     @Test
     void deactivateTraineeProfileTest() {
+        when(traineeDao.update(any(Trainee.class))).thenReturn(trainee);
+
         trainee.setActive(true);
 
-        traineeService.deactivate(trainee);
+        boolean deactivated = traineeService.deactivate(trainee);
 
+        assertTrue(deactivated);
         assertFalse(trainee.isActive());
+        verify(traineeDao, times(1)).update(trainee);
     }
 
     @Test

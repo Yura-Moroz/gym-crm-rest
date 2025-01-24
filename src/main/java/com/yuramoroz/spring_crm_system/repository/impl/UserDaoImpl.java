@@ -3,6 +3,7 @@ package com.yuramoroz.spring_crm_system.repository.impl;
 import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.repository.UserDao;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
@@ -75,9 +76,12 @@ public abstract class UserDaoImpl<T extends User> implements UserDao<T> {
         Query query = entityManager.createQuery(jpqlQuery);
         query.setParameter("login", username);
 
-        T returnedUser = (T) query.getSingleResult();
-
-        return Optional.ofNullable(returnedUser);
+        try {
+            T returnedUser = (T) query.getSingleResult();
+            return Optional.ofNullable(returnedUser);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

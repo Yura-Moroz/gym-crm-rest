@@ -45,11 +45,12 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
 
     @Override
     @Transactional
-    public void changePassword(T user, String oldPassword, String newPassword) {
+    public boolean changePassword(T user, String oldPassword, String newPassword) {
 
+        boolean result = false;
         if (user == null) {
             log.warn("Can't change password when user is null");
-            return;
+            return false;
         }
 
         boolean approvedPass = PasswordManager.ifPasswordMatches(oldPassword, user.getPassword());
@@ -65,8 +66,10 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
             user.setPassword(PasswordManager.hashPassword(newPassword));
             update(user);
             resultLog = "New password successfully set to user";
+            result = true;
         }
         log.info(resultLog);
+        return result;
     }
 
     @Override
@@ -81,17 +84,21 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
     }
 
     @Override
-    public void deactivate(T user) {
-        log.info("Deactivating user profile");
+    public boolean activate(T user) {
+        log.info("Activating user profile");
+        if(user == null) return false;
 
-        user.setActive(false);
+        user.setActive(true);
+        return repository.update(user).isActive();
     }
 
     @Override
-    public void activate(T user) {
-        log.info("Activating user profile");
+    public boolean deactivate(T user) {
+        log.info("Deactivating user profile");
+        if (user == null) return false;
 
-        user.setActive(true);
+        user.setActive(false);
+        return !repository.update(user).isActive();
     }
 
     @Override

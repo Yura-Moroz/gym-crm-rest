@@ -1,6 +1,7 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.entity.User;
+import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ public interface BaseUserService<T extends User> {
 
     public Optional<T> getById(long id);
 
-    public boolean changePassword(T user, String oldPassword, String newPassword);
+    public PasswordChangingResult changePassword(T user, String oldPassword, String newPassword);
 
     public T update(T user);
 

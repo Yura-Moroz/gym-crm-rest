@@ -1,6 +1,7 @@
 package com.yuramoroz.spring_crm_system.service.impl;
 
 import com.yuramoroz.spring_crm_system.entity.User;
+import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 import com.yuramoroz.spring_crm_system.repository.UserDao;
 import com.yuramoroz.spring_crm_system.service.BaseUserService;
 import com.yuramoroz.spring_crm_system.utils.ProfileUtils;
@@ -45,31 +46,35 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
 
     @Override
     @Transactional
-    public boolean changePassword(T user, String oldPassword, String newPassword) {
+    public PasswordChangingResult changePassword(T user, String oldPassword, String newPassword) {
 
-        boolean result = false;
         if (user == null) {
-            log.warn("Can't change password when user is null");
-            return false;
+            return PasswordChangingResult.builder()
+                    .succeed(false)
+                    .message("Can't change password when user is null")
+                    .build();
         }
 
-        boolean approvedPass = PasswordManager.ifPasswordMatches(oldPassword, user.getPassword());
-        String resultLog;
+        boolean succeed = false;
+        String resultMessage;
 
-        if (!approvedPass) {
-            resultLog = "Sorry, It seems that you provided wrong old password";
+        if (!PasswordManager.ifPasswordMatches(oldPassword, user.getPassword())) {
+            resultMessage = "Sorry, It seems that you provided wrong old password";
         } else if (!PasswordManager.verify(newPassword)) {
-            resultLog = "Please check that your new password meets all requirements (length should be 4-10 chars)";
+            resultMessage = "Please check that your new password meets all requirements (length should be 4-10 chars)";
         } else if (!repository.ifExistById(user.getId())) {
-            resultLog = "Sorry, can't change password because provided user doesn't exist...";
+            resultMessage = "Sorry, can't change password because provided user doesn't exist...";
         } else {
             user.setPassword(PasswordManager.hashPassword(newPassword));
             update(user);
-            resultLog = "New password successfully set to user";
-            result = true;
+            resultMessage = "New password successfully set to user";
+            succeed = true;
         }
-        log.info(resultLog);
-        return result;
+
+        return PasswordChangingResult.builder()
+                .succeed(succeed)
+                .message(resultMessage)
+                .build();
     }
 
     @Override

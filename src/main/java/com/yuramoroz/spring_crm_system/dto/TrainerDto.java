@@ -1,5 +1,6 @@
 package com.yuramoroz.spring_crm_system.dto;
 
+import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -16,4 +17,6 @@ public class TrainerDto extends UserDto{
     private String specialization;
 
     private List<Training> trainingList;
+
+    private List<Trainee> trainees;
 }

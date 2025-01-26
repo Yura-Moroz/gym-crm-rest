@@ -2,13 +2,14 @@ package com.yuramoroz.spring_crm_system.dto;
 
 import com.yuramoroz.spring_crm_system.entity.Training;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)

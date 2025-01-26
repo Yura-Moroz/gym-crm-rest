@@ -2,10 +2,10 @@ package com.yuramoroz.spring_crm_system.service.impl;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
+import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.UserDao;
 import com.yuramoroz.spring_crm_system.service.BaseUserService;
 import com.yuramoroz.spring_crm_system.utils.ProfileUtils;
-import com.yuramoroz.spring_crm_system.validation.PasswordManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         if (user == null) throw new IllegalArgumentException("Expected User but no proper data was provided");
 
         user.setUserName(ProfileUtils.generateUsername(user, repository::ifExistByUsername));
-        user.setPassword(PasswordManager.hashPassword(user.getPassword()));
+        user.setPassword(PasswordHandler.hashPassword(user.getPassword()));
 
         return repository.save(user);
     }
@@ -48,24 +48,19 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
     @Transactional
     public PasswordChangingResult changePassword(T user, String oldPassword, String newPassword) {
 
-        if (user == null) {
-            return PasswordChangingResult.builder()
-                    .succeed(false)
-                    .message("Can't change password when user is null")
-                    .build();
-        }
-
         boolean succeed = false;
         String resultMessage;
 
-        if (!PasswordManager.ifPasswordMatches(oldPassword, user.getPassword())) {
+        if (user == null) {
+            resultMessage = "Can't change password when user is null";
+        } else if (!PasswordHandler.ifPasswordMatches(oldPassword, user.getPassword())) {
             resultMessage = "Sorry, It seems that you provided wrong old password";
-        } else if (!PasswordManager.verify(newPassword)) {
+        } else if (!PasswordHandler.verify(newPassword)) {
             resultMessage = "Please check that your new password meets all requirements (length should be 4-10 chars)";
         } else if (!repository.ifExistById(user.getId())) {
             resultMessage = "Sorry, can't change password because provided user doesn't exist...";
         } else {
-            user.setPassword(PasswordManager.hashPassword(newPassword));
+            user.setPassword(PasswordHandler.hashPassword(newPassword));
             update(user);
             resultMessage = "New password successfully set to user";
             succeed = true;
@@ -91,7 +86,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
     @Override
     public boolean activate(T user) {
         log.info("Activating user profile");
-        if(user == null) return false;
+        if (user == null) return false;
 
         user.setActive(true);
         return repository.update(user).isActive();

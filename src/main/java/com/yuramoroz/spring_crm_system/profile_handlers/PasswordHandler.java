@@ -1,8 +1,8 @@
-package com.yuramoroz.spring_crm_system.validation;
+package com.yuramoroz.spring_crm_system.profile_handlers;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-public class PasswordManager {
+public class PasswordHandler {
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static String hashPassword(String password) {

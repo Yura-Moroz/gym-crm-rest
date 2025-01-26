@@ -1,4 +1,4 @@
-package com.yuramoroz.spring_crm_system.mapper;
+package com.yuramoroz.spring_crm_system.converters;
 
 import com.yuramoroz.spring_crm_system.dto.TraineeDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;

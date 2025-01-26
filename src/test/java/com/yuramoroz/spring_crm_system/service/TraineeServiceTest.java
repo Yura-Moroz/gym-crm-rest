@@ -1,9 +1,9 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.entity.Trainee;
+import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TraineeDao;
 import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
-import com.yuramoroz.spring_crm_system.validation.PasswordManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -152,10 +152,10 @@ public class TraineeServiceTest {
         String newPassword = "pass123";
         String oldPassword = trainee.getPassword();
 
-        try (MockedStatic<PasswordManager> mockedStatic = Mockito.mockStatic(PasswordManager.class)) {
-            mockedStatic.when(() -> PasswordManager.verify(newPassword)).thenReturn(true);
-            mockedStatic.when(() -> PasswordManager.ifPasswordMatches(oldPassword, trainee.getPassword())).thenReturn(true);
-            mockedStatic.when(() -> PasswordManager.hashPassword(newPassword)).thenReturn(newPassword);
+        try (MockedStatic<PasswordHandler> mockedStatic = Mockito.mockStatic(PasswordHandler.class)) {
+            mockedStatic.when(() -> PasswordHandler.verify(newPassword)).thenReturn(true);
+            mockedStatic.when(() -> PasswordHandler.ifPasswordMatches(oldPassword, trainee.getPassword())).thenReturn(true);
+            mockedStatic.when(() -> PasswordHandler.hashPassword(newPassword)).thenReturn(newPassword);
             when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
             when(traineeDao.update(trainee)).thenReturn(trainee);
 
@@ -164,9 +164,9 @@ public class TraineeServiceTest {
             assertEquals(trainee.getPassword(), newPassword);
             verify(traineeDao, times(2)).ifExistById(trainee.getId());
             verify(traineeDao, times(1)).update(trainee);
-            mockedStatic.verify(() -> PasswordManager.hashPassword(newPassword), times(1));
-            mockedStatic.verify(() -> PasswordManager.ifPasswordMatches(oldPassword, oldPassword), times(1));
-            mockedStatic.verify(() -> PasswordManager.verify(newPassword), times(1));
+            mockedStatic.verify(() -> PasswordHandler.hashPassword(newPassword), times(1));
+            mockedStatic.verify(() -> PasswordHandler.ifPasswordMatches(oldPassword, oldPassword), times(1));
+            mockedStatic.verify(() -> PasswordHandler.verify(newPassword), times(1));
         }
     }
 }

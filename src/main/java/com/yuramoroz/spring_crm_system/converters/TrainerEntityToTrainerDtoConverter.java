@@ -1,4 +1,4 @@
-package com.yuramoroz.spring_crm_system.mapper;
+package com.yuramoroz.spring_crm_system.converters;
 
 import com.yuramoroz.spring_crm_system.dto.TrainerDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
@@ -18,6 +18,7 @@ public class TrainerEntityToTrainerDtoConverter implements Converter<Trainer, Tr
     public TrainerDto convert(@NotNull Trainer trainer) {
         List<Trainee> traineeList = trainer.getTrainings()
                 .stream()
+                .distinct()
                 .map(Training::getTrainee)
                 .collect(Collectors.toList());
 

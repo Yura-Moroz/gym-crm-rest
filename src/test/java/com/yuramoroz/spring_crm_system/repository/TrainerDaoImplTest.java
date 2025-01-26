@@ -5,7 +5,6 @@ import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
-import jakarta.persistence.NoResultException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

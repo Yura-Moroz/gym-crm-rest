@@ -2,7 +2,7 @@ package com.yuramoroz.spring_crm_system.service.impl;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
-import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
+import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.UserDao;
 import com.yuramoroz.spring_crm_system.service.BaseUserService;
 import com.yuramoroz.spring_crm_system.utils.ProfileUtils;
@@ -52,9 +52,9 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         String resultMessage;
 
         if (user == null) {
-            resultMessage = "Can't change password when user is null";
+            resultMessage = "Can't change password when the user is null";
         } else if (!PasswordHandler.ifPasswordMatches(oldPassword, user.getPassword())) {
-            resultMessage = "Sorry, It seems that you provided wrong old password";
+            resultMessage = "Sorry, It seems that you've provided wrong old password";
         } else if (!PasswordHandler.verify(newPassword)) {
             resultMessage = "Please check that your new password meets all requirements (length should be 4-10 chars)";
         } else if (!repository.ifExistById(user.getId())) {
@@ -62,7 +62,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         } else {
             user.setPassword(PasswordHandler.hashPassword(newPassword));
             update(user);
-            resultMessage = "New password successfully set to user";
+            resultMessage = "New password was successfully set to the user";
             succeed = true;
         }
 

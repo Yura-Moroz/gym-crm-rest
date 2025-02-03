@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "trainers")
@@ -22,6 +21,6 @@ public class Trainer extends User{
     @Column(name = "specialization", nullable = false)
     private String specialization;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Training> trainings;
 }

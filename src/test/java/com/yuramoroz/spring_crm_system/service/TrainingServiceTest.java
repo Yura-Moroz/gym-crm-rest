@@ -48,14 +48,21 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void getTrainingById(){
+    public void getTrainingByIdTest(){
         trainingService.getById(training.getId());
 
         verify(trainingDao, times(1)).getById(training.getId());
     }
 
     @Test
-    public void getTrainingByTraineeUsernameAndDateRange(){
+    public void getAllTrainings(){
+        trainingService.getAll();
+
+        verify(trainingDao, times(1)).getAll();
+    }
+
+    @Test
+    public void getTrainingByTraineeUsernameAndDateRangeTest(){
         String traineeLogin = "Test.Trainee";
         String trainerLogin = "Test.Trainer";
         LocalDate from = LocalDate.now();
@@ -69,7 +76,7 @@ public class TrainingServiceTest {
     }
 
     @Test
-    public void getTrainingByTrainerUsernameAndDateRange(){
+    public void getTrainingByTrainerUsernameAndDateRangeTest(){
         String trainerLogin = "Test.Trainer";
         String traineeLogin = "Test.Trainee";
         LocalDate from = LocalDate.now();

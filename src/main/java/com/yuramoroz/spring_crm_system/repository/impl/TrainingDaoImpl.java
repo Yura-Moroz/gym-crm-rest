@@ -57,16 +57,16 @@ public class TrainingDaoImpl implements TrainingDao {
         log.info("Trying to get trainings by criteria from DB");
 
         String jpql = """
-               SELECT t FROM Training t WHERE t.trainee.userName = :traineeLogin
-               AND t.trainingDate >= :dateFrom AND t.trainingDate <= :dateTo
-               AND (t.trainer.userName = :trainerLogin)
-               AND t.trainingType = :trainingType
-               """;
+                SELECT t FROM Training t WHERE t.trainee.userName = :traineeLogin
+                AND t.trainingDate >= :dateFrom AND t.trainingDate <= :dateTo
+                AND (t.trainer.userName = :trainerLogin)
+                AND t.trainingType = :trainingType
+                """;
 
         Query query = entityManager.createQuery(jpql);
         query.setParameter("traineeLogin", traineeLogin);
-        query.setParameter("dateFrom", dateFrom.atTime(0, 0, 0));
-        query.setParameter("dateTo", dateTo.atTime(23, 59, 59));
+        query.setParameter("dateFrom", dateFrom == null ? LocalDate.now().atTime(0, 0, 0) : dateFrom.atTime(0, 0, 0));
+        query.setParameter("dateTo", dateTo == null ? LocalDate.now().atTime(23, 59, 59) : dateTo.atTime(23, 59, 59));
         query.setParameter("trainerLogin", trainerLogin);
         query.setParameter("trainingType", trainingType);
 
@@ -86,8 +86,8 @@ public class TrainingDaoImpl implements TrainingDao {
 
         Query query = entityManager.createQuery(jpql);
         query.setParameter("trainerLogin", trainerLogin);
-        query.setParameter("dateFrom", dateFrom.atTime(0, 0, 0));
-        query.setParameter("dateTo", dateTo.atTime(23, 59, 59));
+        query.setParameter("dateFrom", dateFrom == null ? LocalDate.now().atTime(0, 0, 0) : dateFrom.atTime(0, 0, 0));
+        query.setParameter("dateTo", dateTo == null ? LocalDate.now().atTime(23, 59, 59) : dateTo.atTime(23, 59, 59));
         query.setParameter("traineeLogin", traineeLogin);
         query.setParameter("trainingType", trainingType);
 

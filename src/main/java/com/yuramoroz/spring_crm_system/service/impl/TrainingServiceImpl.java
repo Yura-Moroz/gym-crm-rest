@@ -31,6 +31,11 @@ public class TrainingServiceImpl implements TrainingService {
         return trainingDao.getById(id);
     }
 
+    public List<Training> getAll(){
+        log.info("Selecting all trainings from the DB");
+        return trainingDao.getAll();
+    }
+
     @Override
     public List<Training> getTrainingsByTraineeUsernameAndDateRange(String traineeLogin, LocalDate dateFrom, LocalDate dateTo, String trainerLogin, TrainingType trainingType) {
         log.info("Trying to get Trainings list where Trainee username is: {}", traineeLogin);

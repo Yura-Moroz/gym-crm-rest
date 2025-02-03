@@ -1,7 +1,7 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.entity.Trainer;
-import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
+import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TrainerDao;
 import com.yuramoroz.spring_crm_system.service.impl.TrainerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;

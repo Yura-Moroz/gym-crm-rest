@@ -1,0 +1,27 @@
+package com.yuramoroz.spring_crm_system.converters.trainerConverters;
+
+import com.yuramoroz.spring_crm_system.dto.trainers.TrainerDto;
+import com.yuramoroz.spring_crm_system.entity.Trainer;
+import com.yuramoroz.spring_crm_system.entity.Training;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class TrainerDtoToTrainerEntityConverter implements Converter<TrainerDto, Trainer> {
+
+    @Override
+    public Trainer convert(TrainerDto trainerDto) {
+        return Trainer.builder()
+                .id(trainerDto.getId())
+                .firstName(trainerDto.getFirstName())
+                .lastName(trainerDto.getLastName())
+                .userName(trainerDto.getUserName())
+                .password(trainerDto.getPassword())
+                .specialization(trainerDto.getSpecialization())
+                .active(trainerDto.isActive())
+                .trainings(trainerDto.getTrainings())
+                .build();
+    }
+}

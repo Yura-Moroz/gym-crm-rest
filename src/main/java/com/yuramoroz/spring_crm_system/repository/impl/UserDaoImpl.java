@@ -63,6 +63,7 @@ public abstract class UserDaoImpl<T extends User> implements UserDao<T> {
     }
 
     @Override
+    @Transactional
     public void delete(T entity) {
         log.info("Trying to delete a user from the DB");
         entityManager.remove(entity);

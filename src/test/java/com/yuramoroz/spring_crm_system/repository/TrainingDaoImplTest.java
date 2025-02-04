@@ -64,7 +64,7 @@ public class TrainingDaoImplTest {
         training = Training.builder()
                 .trainingName("TestTraining")
                 .trainingDuration(Duration.ofMinutes(60))
-                .trainingDate(LocalDateTime.of(2025, 1, 28, 13, 0))
+                .trainingDate(LocalDateTime.now())
                 .trainingType(TrainingType.BACK_TRAINING)
                 .trainee(trainee)
                 .trainer(trainer)
@@ -114,7 +114,7 @@ public class TrainingDaoImplTest {
         Training training2 = Training.builder()
                 .trainingName("TestTraining")
                 .trainingDuration(Duration.ofMinutes(90))
-                .trainingDate(LocalDateTime.of(2025, 1, 31, 13, 0))
+                .trainingDate(LocalDateTime.now())
                 .trainingType(TrainingType.FITNESS)
                 .trainee(trainee)
                 .trainer(trainer)
@@ -132,7 +132,7 @@ public class TrainingDaoImplTest {
     public void getTrainingsByTraineeUsernameAndDateRangeTest() {
 
         List<Training> trainings = trainingDao.getTrainingsByTraineeUsernameAndDateRange(
-                trainee.getUserName(), LocalDate.now(), LocalDate.of(2025, 3, 27), trainer.getUserName(), TrainingType.BACK_TRAINING);
+                trainee.getUserName(), LocalDate.now().minusDays(10), LocalDate.now().plusMonths(1), trainer.getUserName(), TrainingType.BACK_TRAINING);
 
         assertThat(trainings).containsExactlyInAnyOrder(training);
     }
@@ -141,7 +141,7 @@ public class TrainingDaoImplTest {
     public void getTrainingsByTrainerUsernameAndDateRangeTest() {
 
         List<Training> trainings = trainingDao.getTrainingsByTrainerUsernameAndDateRange(
-                trainer.getUserName(), LocalDate.now(), LocalDate.of(2025, 3, 27), trainee.getUserName(), TrainingType.BACK_TRAINING);
+                trainer.getUserName(), LocalDate.now().minusDays(10), LocalDate.now().plusMonths(1), trainee.getUserName(), TrainingType.BACK_TRAINING);
 
         assertThat(trainings).containsExactlyInAnyOrder(training);
     }

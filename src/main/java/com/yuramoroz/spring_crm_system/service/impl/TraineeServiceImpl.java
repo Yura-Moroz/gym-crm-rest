@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -41,13 +43,13 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         if (trainee == null || traineeUpdatingDto == null)
             throw new NoSuchElementException("This user was not found in DB");
 
-        if(repository.ifExistById(trainee.getId())) {
-            trainee.setUserName(trainee.getUserName());
-            trainee.setFirstName(trainee.getFirstName());
-            trainee.setLastName(trainee.getLastName());
+        if (repository.ifExistById(trainee.getId())) {
+            trainee.setUserName(traineeUpdatingDto.getUserName());
+            trainee.setFirstName(traineeUpdatingDto.getFirstName());
+            trainee.setLastName(traineeUpdatingDto.getLastName());
             trainee.setDateOfBirth(traineeUpdatingDto.getDateOfBirth() == null ? trainee.getDateOfBirth() : traineeUpdatingDto.getDateOfBirth());
             trainee.setAddress(traineeUpdatingDto.getAddress() == null ? trainee.getAddress() : traineeUpdatingDto.getAddress());
-            trainee.setActive(trainee.isActive());
+            trainee.setActive(traineeUpdatingDto.isActive());
 
             return repository.update(trainee);
         }
@@ -69,7 +71,10 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         log.info("Trying to update trainings for Trainee");
         if (trainee != null && !trainings.isEmpty()) {
             if (repository.ifExistById(trainee.getId())) {
-                trainee.setTrainings(trainings);
+                trainee.setTrainings(trainings
+                        .stream()
+                        .filter(training -> Objects.equals(training.getTrainee().getId(), trainee.getId()))
+                        .collect(Collectors.toList()));
                 return repository.update(trainee);
             }
         }

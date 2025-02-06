@@ -1,16 +1,13 @@
 package com.yuramoroz.spring_crm_system.repository;
 
-import com.yuramoroz.spring_crm_system.config.TestConfig;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -24,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Transactional
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
+@SpringBootTest
 public class TrainingDaoImplTest {
 
     @Autowired

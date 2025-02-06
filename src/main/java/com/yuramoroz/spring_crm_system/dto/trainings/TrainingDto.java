@@ -21,7 +21,7 @@ public class TrainingDto {
     @JsonView(TrainingViews.Hidden.class)
     private Long id;
 
-    @JsonView(TrainingViews.GetTrainerResp.class)
+    @JsonView({TrainingViews.GetTrainerResp.class})
     private Trainee trainee;
 
     @JsonView(TrainingViews.GetTraineeResp.class)

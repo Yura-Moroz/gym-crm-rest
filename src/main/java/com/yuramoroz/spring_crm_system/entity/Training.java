@@ -25,11 +25,11 @@ public class Training {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "trainee_id")
+    @JoinColumn(name = "trainee_id", nullable = false)
     private Trainee trainee;
 
     @ManyToOne
-    @JoinColumn(name = "trainer_id")
+    @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
 
     @NotNull

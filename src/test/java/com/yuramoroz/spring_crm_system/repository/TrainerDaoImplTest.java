@@ -1,16 +1,13 @@
 package com.yuramoroz.spring_crm_system.repository;
 
-import com.yuramoroz.spring_crm_system.config.TestConfig;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -23,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Transactional
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
+@SpringBootTest
 public class TrainerDaoImplTest {
 
     @Autowired
@@ -185,6 +181,22 @@ public class TrainerDaoImplTest {
                 .active(true)
                 .build();
 
+        Trainee traineeAndrew = Trainee.builder()
+                .firstName("Andrew")
+                .lastName("Sakharov")
+                .userName("andrew.sugar")
+                .password("afgfd")
+                .active(true)
+                .build();
+
+        Trainee traineeJohny = Trainee.builder()
+                .firstName("John")
+                .lastName("Osborn")
+                .userName("john.ozzy")
+                .password("klafjhgaf")
+                .active(true)
+                .build();
+
         Trainer trainerDustin = Trainer.builder()
                 .firstName("Dustin")
                 .lastName("Poirier")
@@ -218,6 +230,7 @@ public class TrainerDaoImplTest {
                 .trainingDuration(Duration.ofMinutes(60))
                 .trainingType(TrainingType.MIXED_MARTIAL_ARTS)
                 .trainer(trainerDustin)
+                .trainee(traineeAndrew)
                 .build();
 
         Training training3 = Training.builder()
@@ -226,9 +239,12 @@ public class TrainerDaoImplTest {
                 .trainingDuration(Duration.ofMinutes(45))
                 .trainingType(TrainingType.CARDIO)
                 .trainer(trainerKhabib)
+                .trainee(traineeJohny)
                 .build();
 
         traineeDao.save(traineeBob);
+        traineeDao.save(traineeAndrew);
+        traineeDao.save(traineeJohny);
 
         trainerDao.save(trainer);
         trainerDao.save(trainerDustin);

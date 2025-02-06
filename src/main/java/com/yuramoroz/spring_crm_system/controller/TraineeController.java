@@ -3,6 +3,7 @@ package com.yuramoroz.spring_crm_system.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.yuramoroz.spring_crm_system.dto.trainees.*;
 import com.yuramoroz.spring_crm_system.dto.UserLoginDto;
+import com.yuramoroz.spring_crm_system.dto.trainings.TrainingAddingDto;
 import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Training;
@@ -83,8 +84,7 @@ public class TraineeController {
     @JsonView(TrainingViews.UpdateTraineeTrainings.class)
     public ResponseEntity<List<TrainingDto>> updateTrainingsList(@PathVariable String username,
                                                                  @RequestBody @Valid
-                                                                 @JsonView(TrainingViews.UpdateTraineeTrainings.class)
-                                                                 List<TrainingDto> trainingsDto) {
+                                                                 List<TrainingAddingDto> trainingsDto) {
         Trainee trainee = traineeService.getByUsername(username).get();
         List<Training> newTrainings = trainingsDto.stream()
                 .map(trainingDto -> conversionService.convert(trainingDto, Training.class)).collect(Collectors.toList());

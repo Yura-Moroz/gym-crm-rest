@@ -3,6 +3,7 @@ package com.yuramoroz.spring_crm_system.service;
 import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
 import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
+import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
@@ -128,12 +129,23 @@ public class TraineeServiceTest {
 
     @Test
     void updateTraineeTrainingsTest() {
+        Trainer trainerDustin = Trainer.builder()
+                .firstName("Dustin")
+                .lastName("Poirier")
+                .userName("Dustin.Poirier")
+                .password("qwerty456")
+                .active(true)
+                .specialization("MMA")
+                .build();
+
         Training training = Training.builder()
                 .id(1L)
                 .trainingName("Calistenics")
                 .trainingDate(LocalDateTime.now())
                 .trainingType(TrainingType.CROSSFIT)
                 .trainingDuration(Duration.ofMinutes(75))
+                .trainee(trainee)
+                .trainer(trainerDustin)
                 .build();
         List<Training> trainings = List.of(training);
 

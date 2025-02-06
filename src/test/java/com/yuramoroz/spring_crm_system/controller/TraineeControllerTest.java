@@ -3,9 +3,11 @@ package com.yuramoroz.spring_crm_system.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yuramoroz.spring_crm_system.converters.traineeConverters.TraineeDtoToTraineeEntityConverter;
 import com.yuramoroz.spring_crm_system.converters.traineeConverters.TraineeToDtoConverter;
+import com.yuramoroz.spring_crm_system.converters.trainingConverters.TrainingAddingDtoToTrainingConverter;
 import com.yuramoroz.spring_crm_system.converters.trainingConverters.TrainingEntityToTrainingDtoConverter;
 import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
 import com.yuramoroz.spring_crm_system.dto.UserLoginDto;
+import com.yuramoroz.spring_crm_system.dto.trainings.TrainingAddingDto;
 import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Training;
@@ -29,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -53,6 +55,9 @@ public class TraineeControllerTest {
 
     @MockitoBean
     private TrainingEntityToTrainingDtoConverter toTrainingDtoConverter;
+
+    @MockitoBean
+    private TrainingAddingDtoToTrainingConverter addingDtoToTrainingConverter;
 
     private Trainee trainee;
     private TraineeDto traineeDto;
@@ -83,7 +88,6 @@ public class TraineeControllerTest {
 
     @Test
     void shouldCreateTrainee() throws Exception {
-        when(toTraineeEntityConverter.convert(any(TraineeDto.class))).thenReturn(trainee);
         when(traineeService.save(any(TraineeDto.class))).thenReturn(trainee);
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
@@ -93,6 +97,9 @@ public class TraineeControllerTest {
                         .content(objectMapper.writeValueAsString(traineeDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userName").value("john.doe"));
+
+        verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
+        verify(traineeService, times(1)).save(any(TraineeDto.class));
     }
 
     @Test
@@ -105,6 +112,9 @@ public class TraineeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"));
+
+        verify(traineeService, times(1)).getByUsername("john.doe");
+        verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
     }
 
     @Test
@@ -119,6 +129,10 @@ public class TraineeControllerTest {
                         .content(objectMapper.writeValueAsString(traineeDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"));
+
+        verify(traineeService, times(1)).getById(1L);
+        verify(traineeService, times(1)).update(any(Trainee.class), any(TraineeDto.class));
+        verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
     }
 
     @Test
@@ -141,6 +155,53 @@ public class TraineeControllerTest {
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Password changed successfully"));
+
+        verify(traineeService, times(1)).getByUsername("john.doe");
+        verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
+    }
+
+    @Test
+    void changePassword_InvalidOldPassword() throws Exception {
+        //Given
+        UserLoginDto loginDto = new UserLoginDto("user", "wrongOldPass", "newPass");
+        Trainee trainee = new Trainee();
+
+        //When
+        when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
+        when(traineeService.changePassword(any(), any(), any())).thenReturn(
+                new PasswordChangingResult(false, "Sorry, It seems that you've provided wrong old password"));
+
+        //Then
+        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Sorry, It seems that you've provided wrong old password"));
+
+        verify(traineeService, times(1)).getByUsername("user");
+        verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
+    }
+
+    @Test
+    void changePassword_InvalidNewPassword() throws Exception {
+        //Given
+        UserLoginDto loginDto = new UserLoginDto("user", "oldPassword", "InvalidNewPass");
+        Trainee trainee = new Trainee();
+
+        //When
+        when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
+        when(traineeService.changePassword(any(), any(), any())).thenReturn(
+                new PasswordChangingResult(false, "Please check that your new password meets all requirements (length should be 4-10 chars)"));
+
+        //Then
+        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Please check that your new password meets all requirements (length should be 4-10 chars)"));
+
+        verify(traineeService, times(1)).getByUsername("user");
+        verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
     }
 
     @Test
@@ -152,51 +213,27 @@ public class TraineeControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(traineeDto)))
                 .andExpect(status().isOk());
+
+        verify(traineeService, times(1)).getByUsername("john.doe");
     }
 
     @Test
     void getProfileByUsername_NotFound() throws Exception {
+        //When
         when(traineeService.getByUsername("nonexistent")).thenReturn(Optional.empty());
 
+        //Then
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainees/nonexistent")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("The user was not found"));
-    }
 
-    @Test
-    void changePassword_InvalidOldPassword() throws Exception {
-        UserLoginDto loginDto = new UserLoginDto("user", "wrongOldPass", "newPass");
-        Trainee trainee = new Trainee();
-        when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
-        when(traineeService.changePassword(any(), any(), any())).thenReturn(
-                new PasswordChangingResult(false, "Sorry, It seems that you've provided wrong old password"));
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Sorry, It seems that you've provided wrong old password"));
-    }
-
-    @Test
-    void changePassword_InvalidNewPassword() throws Exception {
-        UserLoginDto loginDto = new UserLoginDto("user", "oldPassword", "InvalidNewPass");
-        Trainee trainee = new Trainee();
-        when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
-        when(traineeService.changePassword(any(), any(), any())).thenReturn(
-                new PasswordChangingResult(false, "Please check that your new password meets all requirements (length should be 4-10 chars)"));
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Please check that your new password meets all requirements (length should be 4-10 chars)"));
+        verify(traineeService, times(1)).getByUsername("nonexistent");
     }
 
     @Test
     void updateTrainingsList_Success() throws Exception {
-        Trainee trainee = new Trainee();
+        // Given
         Training training = Training.builder()
                 .trainingName("Yoga")
                 .trainingType(TrainingType.STRETCHING)
@@ -205,8 +242,23 @@ public class TraineeControllerTest {
                 .build();
         trainee.setTrainings(List.of(training));
 
-        List<TrainingDto> trainingDtos = List.of(
+        List<TrainingAddingDto> trainingDtos = List.of(
+                TrainingAddingDto.builder()
+                        .traineeUsername("john.doe")
+                        .trainerUsername("trainer.username")
+                        .trainingName("Legs")
+                        .date(LocalDateTime.of(2025, 3, 17, 16, 0, 0))
+                        .duration(Duration.ofMinutes(90))
+                        .type(TrainingType.LEGS_DAY)
+                        .build()
+        );
+
+        // When
+        when(traineeService.getByUsername(any())).thenReturn(Optional.of(trainee));
+        when(traineeService.updateTrainings(any(Trainee.class), any())).thenReturn(trainee);
+        when(toTrainingDtoConverter.convert(any(Training.class))).thenReturn(
                 TrainingDto.builder()
+                        .trainee(trainee)
                         .trainingName("Legs")
                         .type(TrainingType.LEGS_DAY)
                         .date(LocalDateTime.of(2025, 3, 17, 16, 0, 0))
@@ -214,11 +266,8 @@ public class TraineeControllerTest {
                         .build()
         );
 
-        when(traineeService.getByUsername(any())).thenReturn(Optional.of(trainee));
-        when(traineeService.update(any(Trainee.class), any(TraineeDto.class))).thenReturn(trainee);
-        when(toTrainingDtoConverter.convert(any(Training.class))).thenReturn(trainingDtos.get(0));
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/username/update-trainings")
+        // Then
+        mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/john.doe/update-trainings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(trainingDtos)))
                 .andExpect(status().isOk())
@@ -227,6 +276,10 @@ public class TraineeControllerTest {
                 .andExpect(jsonPath("$[0].type").value("LEGS_DAY"))
                 .andExpect(jsonPath("$[0].date").value("2025-03-17T16:00:00"))
                 .andExpect(jsonPath("$[0].duration").value("PT1H30M"));
+
+        verify(traineeService, times(1)).getByUsername(any());
+        verify(traineeService, times(1)).updateTrainings(any(Trainee.class), any());
+        verify(toTrainingDtoConverter, times(1)).convert(any(Training.class));
     }
 
 }

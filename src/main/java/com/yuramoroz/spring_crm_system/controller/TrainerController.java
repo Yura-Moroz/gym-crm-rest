@@ -1,8 +1,6 @@
 package com.yuramoroz.spring_crm_system.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.yuramoroz.spring_crm_system.converters.trainerConverters.TrainerDtoToTrainerEntityConverter;
-import com.yuramoroz.spring_crm_system.converters.trainerConverters.TrainerEntityToTrainerDtoConverter;
 import com.yuramoroz.spring_crm_system.dto.UserLoginDto;
 import com.yuramoroz.spring_crm_system.dto.trainers.TrainerDto;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
@@ -10,8 +8,8 @@ import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 import com.yuramoroz.spring_crm_system.service.TrainerService;
 import com.yuramoroz.spring_crm_system.views.TrainerViews;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,16 +20,12 @@ import java.util.List;
 @RequestMapping("/gym-api/trainers")
 @RestController
 @Validated
+@RequiredArgsConstructor
 public class TrainerController {
 
-    @Autowired
-    private TrainerService trainerService;
+    private final TrainerService trainerService;
 
-    @Autowired
-    private TrainerDtoToTrainerEntityConverter toTrainerEntityConverter;
-
-    @Autowired
-    private TrainerEntityToTrainerDtoConverter toTrainerDtoConverter;
+    private final ConversionService conversionService;
 
 
     @PostMapping
@@ -39,12 +33,8 @@ public class TrainerController {
     public ResponseEntity<TrainerDto> createProfile(@RequestBody
                                                     @Valid
                                                     @JsonView(TrainerViews.Input.class) TrainerDto trainerDto) {
-
-        Trainer trainer = toTrainerEntityConverter.convert(trainerDto);
-        Trainer createdTrainer = trainerService.save(trainer.getFirstName(), trainer.getLastName(),
-                trainer.getPassword(), trainer.getSpecialization());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(toTrainerDtoConverter.convert(createdTrainer));
+        return ResponseEntity.status(HttpStatus.CREATED).
+                body(conversionService.convert(trainerService.save(trainerDto), TrainerDto.class));
     }
 
 
@@ -62,7 +52,7 @@ public class TrainerController {
     @GetMapping("/{username}")
     @JsonView(TrainerViews.GetResp.class)
     public ResponseEntity<TrainerDto> getProfileByUsername(@PathVariable String username) {
-        TrainerDto profileDto = toTrainerDtoConverter.convert(trainerService.getByUsername(username).get());
+        TrainerDto profileDto = conversionService.convert(trainerService.getByUsername(username).get(), TrainerDto.class);
         return ResponseEntity.ok(profileDto);
     }
 
@@ -74,14 +64,8 @@ public class TrainerController {
                                                     @JsonView(TrainerViews.UpdatingReq.class)
                                                     @Valid TrainerDto trainerUpdatingDto) {
         Trainer trainer = trainerService.getById(id).get();
-        trainer.setFirstName(trainerUpdatingDto.getFirstName());
-        trainer.setLastName(trainerUpdatingDto.getLastName());
-        trainer.setUserName(trainerUpdatingDto.getUserName());
-        trainer.setActive(trainerUpdatingDto.isActive());
-
-        Trainer updatedTrainer = trainerService.update(trainer);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(toTrainerDtoConverter.convert(updatedTrainer));
+                .body(conversionService.convert(trainerService.update(trainer, trainerUpdatingDto), TrainerDto.class));
 
     }
 
@@ -92,7 +76,7 @@ public class TrainerController {
         List<Trainer> unassignedTrainers = trainerService.getUnassignedTrainersToUserByUsername(username);
         List<TrainerDto> resultList = unassignedTrainers
                 .stream()
-                .map(trainer -> toTrainerDtoConverter.convert(trainer))
+                .map(trainer -> conversionService.convert(trainer, TrainerDto.class))
                 .toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(resultList);

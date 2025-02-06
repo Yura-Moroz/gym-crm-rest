@@ -84,7 +84,7 @@ public class TraineeControllerTest {
     @Test
     void shouldCreateTrainee() throws Exception {
         when(toTraineeEntityConverter.convert(any(TraineeDto.class))).thenReturn(trainee);
-        when(traineeService.save(any(), any(), any(), any(), any())).thenReturn(trainee);
+        when(traineeService.save(any(TraineeDto.class))).thenReturn(trainee);
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/gym-api/trainees")
@@ -110,7 +110,7 @@ public class TraineeControllerTest {
     @Test
     void shouldUpdateTraineeProfile() throws Exception {
         when(traineeService.getById(1L)).thenReturn(Optional.of(trainee));
-        when(traineeService.update(any(Trainee.class))).thenReturn(trainee);
+        when(traineeService.update(any(Trainee.class), any(TraineeDto.class))).thenReturn(trainee);
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/1")
@@ -214,8 +214,8 @@ public class TraineeControllerTest {
                         .build()
         );
 
-        when(traineeService.getByUsername("username")).thenReturn(Optional.of(trainee));
-        when(traineeService.update(any())).thenReturn(trainee);
+        when(traineeService.getByUsername(any())).thenReturn(Optional.of(trainee));
+        when(traineeService.update(any(Trainee.class), any(TraineeDto.class))).thenReturn(trainee);
         when(toTrainingDtoConverter.convert(any(Training.class))).thenReturn(trainingDtos.get(0));
 
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/username/update-trainings")
@@ -226,7 +226,7 @@ public class TraineeControllerTest {
                 .andExpect(jsonPath("$[0].trainingName").value("Legs"))
                 .andExpect(jsonPath("$[0].type").value("LEGS_DAY"))
                 .andExpect(jsonPath("$[0].date").value("2025-03-17T16:00:00"))
-                .andExpect(jsonPath("$[0].duration").value("PT1H30M")); // Duration in seconds
+                .andExpect(jsonPath("$[0].duration").value("PT1H30M"));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.yuramoroz.spring_crm_system.service;
 
+import com.yuramoroz.spring_crm_system.dto.trainers.TrainerDto;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TrainerDao;
@@ -43,12 +44,20 @@ public class TrainerServiceTest {
 
     @Test
     void saveTrainerWithMultiParam_shouldSaveTrainerSuccessfully() {
+        TrainerDto trainerDto = TrainerDto.builder()
+                .id(1L)
+                .firstName("Jimmy")
+                .lastName("Page")
+                .userName("Jimmy.Page")
+                .password("page1099")
+                .active(true)
+                .specialization("Lying")
+                .build();
 
         when(trainerDao.ifExistByUsername(anyString())).thenReturn(false);
         when(trainerDao.save(any(Trainer.class))).thenReturn(trainer);
 
-        Trainer savedTrainer = trainerService.save(
-                "Matt", "Watson", "qwerty123", "Powerlifting");
+        Trainer savedTrainer = trainerService.save(trainerDto);
 
         verify(trainerDao, times(1)).ifExistByUsername(anyString());
         verify(trainerDao, times(1)).save(any(Trainer.class));
@@ -92,10 +101,20 @@ public class TrainerServiceTest {
 
     @Test
     void updateTrainerTest() {
+        TrainerDto trainerUpdatingDto = TrainerDto.builder()
+                .id(1L)
+                .firstName("Jimmy")
+                .lastName("Page")
+                .userName("Jimmy.Page")
+                .password("page1099")
+                .active(true)
+                .specialization("Lying")
+                .build();
+
         when(trainerDao.ifExistById(trainer.getId())).thenReturn(true);
         when(trainerDao.update(trainer)).thenReturn(trainer);
 
-        Trainer updatedTrainer = trainerService.update(trainer);
+        Trainer updatedTrainer = trainerService.update(trainer, trainerUpdatingDto);
 
         verify(trainerDao, times(1)).ifExistById(trainer.getId());
         verify(trainerDao, times(1)).update(trainer);
@@ -140,7 +159,7 @@ public class TrainerServiceTest {
             trainerService.changePassword(trainer, oldPassword, newPassword);
 
             assertEquals(trainer.getPassword(), newPassword);
-            verify(trainerDao, times(2)).ifExistById(trainer.getId());
+            verify(trainerDao, times(1)).ifExistById(trainer.getId());
             verify(trainerDao, times(1)).update(trainer);
             mockedStatic.verify(() -> PasswordHandler.hashPassword(newPassword), times(1));
             mockedStatic.verify(() -> PasswordHandler.ifPasswordMatches(oldPassword, oldPassword), times(1));

@@ -1,6 +1,10 @@
 package com.yuramoroz.spring_crm_system.service;
 
+import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
+import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
+import com.yuramoroz.spring_crm_system.entity.Training;
+import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TraineeDao;
 import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
@@ -8,7 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,12 +50,19 @@ public class TraineeServiceTest {
 
     @Test
     void saveTraineeWithMultiParam_shouldSaveTraineeSuccessfully() {
+        TraineeDto traineeDto = TraineeDto.builder()
+                .id(1L)
+                .firstName("Dwayne")
+                .lastName("Johnson")
+                .password("rockPass")
+                .address("123 Street")
+                .dateOfBirth(LocalDate.of(1972, 5, 2))
+                .build();
 
         when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
         when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
 
-        Trainee savedTrainee = traineeService.save(
-                "Matt", "Watson", "qwerty123", "456 Street", LocalDate.of(1980, 6, 19));
+        Trainee savedTrainee = traineeService.save(traineeDto);
 
         verify(traineeDao, times(1)).ifExistByUsername(anyString());
         verify(traineeDao, times(1)).save(any(Trainee.class));
@@ -111,11 +127,40 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void updateTraineeTest() {
+    void updateTraineeTrainingsTest() {
+        Training training = Training.builder()
+                .id(1L)
+                .trainingName("Calistenics")
+                .trainingDate(LocalDateTime.now())
+                .trainingType(TrainingType.CROSSFIT)
+                .trainingDuration(Duration.ofMinutes(75))
+                .build();
+        List<Training> trainings = List.of(training);
+
         when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
         when(traineeDao.update(trainee)).thenReturn(trainee);
 
-        Trainee updatedTrainee = traineeService.update(trainee);
+        Trainee updatedTrainee = traineeService.updateTrainings(trainee, trainings);
+
+        verify(traineeDao, times(1)).ifExistById(trainee.getId());
+        verify(traineeDao, times(1)).update(trainee);
+    }
+
+    @Test
+    void updateTraineeTest(){
+        TraineeDto traineeDto = TraineeDto.builder()
+                .id(1L)
+                .firstName("Dwayne")
+                .lastName("Johnson")
+                .password("rockPass")
+                .address("123 Street")
+                .dateOfBirth(LocalDate.of(1972, 5, 2))
+                .build();
+
+        when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
+        when(traineeDao.update(trainee)).thenReturn(trainee);
+
+        Trainee updatedTrainee = traineeService.update(trainee, traineeDto);
 
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
         verify(traineeDao, times(1)).update(trainee);
@@ -162,7 +207,7 @@ public class TraineeServiceTest {
             traineeService.changePassword(trainee, oldPassword, newPassword);
 
             assertEquals(trainee.getPassword(), newPassword);
-            verify(traineeDao, times(2)).ifExistById(trainee.getId());
+            verify(traineeDao, times(1)).ifExistById(trainee.getId());
             verify(traineeDao, times(1)).update(trainee);
             mockedStatic.verify(() -> PasswordHandler.hashPassword(newPassword), times(1));
             mockedStatic.verify(() -> PasswordHandler.ifPasswordMatches(oldPassword, oldPassword), times(1));

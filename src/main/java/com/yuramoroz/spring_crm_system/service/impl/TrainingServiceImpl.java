@@ -4,6 +4,7 @@ import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.repository.TrainingDao;
 import com.yuramoroz.spring_crm_system.service.TrainingService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,10 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
 
-    @Autowired
-    private TrainingDao trainingDao;
+    private final TrainingDao trainingDao;
 
     @Override
     public Training save(Training training) {

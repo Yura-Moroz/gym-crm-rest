@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -61,7 +60,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
             resultMessage = "Sorry, can't change password because provided user doesn't exist...";
         } else {
             user.setPassword(PasswordHandler.hashPassword(newPassword));
-            update(user);
+            repository.update(user);
             resultMessage = "New password was successfully set to the user";
             succeed = true;
         }
@@ -70,17 +69,6 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
                 .succeed(succeed)
                 .message(resultMessage)
                 .build();
-    }
-
-    @Override
-    @Transactional
-    public T update(T user) {
-        log.info("Updating user");
-        if (repository.ifExistById(user.getId())) {
-            return repository.update(user);
-        } else {
-            throw new NoSuchElementException("This user was not found in DB");
-        }
     }
 
     @Override

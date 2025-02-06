@@ -1,8 +1,6 @@
 package com.yuramoroz.spring_crm_system.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.yuramoroz.spring_crm_system.converters.trainingConverters.TrainingAddingDtoToTrainingConverter;
-import com.yuramoroz.spring_crm_system.converters.trainingConverters.TrainingEntityToTrainingDtoConverter;
 import com.yuramoroz.spring_crm_system.dto.trainings.TrainingAddingDto;
 import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Training;
@@ -10,8 +8,8 @@ import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.service.TrainingService;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,23 +23,19 @@ import java.util.Map;
 @RequestMapping("/gym-api/trainings")
 @RestController
 @Validated
+@RequiredArgsConstructor
 public class TrainingController {
 
-    @Autowired
-    private TrainingService trainingService;
+    private final TrainingService trainingService;
 
-    @Autowired
-    private TrainingAddingDtoToTrainingConverter toTrainingConverter;
-
-    @Autowired
-    private TrainingEntityToTrainingDtoConverter toTrainingDtoConverter;
+    private final ConversionService conversionService;
 
 
     @PostMapping
     public ResponseEntity<Void> addTraining(@RequestBody
                                             @Valid
                                             TrainingAddingDto trainingDto) {
-        trainingService.save(toTrainingConverter.convert(trainingDto));
+        trainingService.save(conversionService.convert(trainingDto, Training.class));
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
@@ -75,7 +69,7 @@ public class TrainingController {
                 traineeUsername, dateFrom, dateTo, trainerUsername, type);
 
         List<TrainingDto> result = traineeTrainingsByCriteria.stream()
-                .map(training -> toTrainingDtoConverter.convert(training))
+                .map(training -> conversionService.convert(training, TrainingDto.class))
                 .toList();
         return result.isEmpty() ?
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(null) :
@@ -97,7 +91,7 @@ public class TrainingController {
                 trainerUsername, dateFrom, dateTo, traineeUsername, type);
 
         List<TrainingDto> result = trainerTrainingsByCriteria.stream()
-                .map(training -> toTrainingDtoConverter.convert(training))
+                .map(training -> conversionService.convert(training, TrainingDto.class))
                 .toList();
         return result.isEmpty() ?
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(null) :

@@ -1,5 +1,7 @@
 package com.yuramoroz.spring_crm_system.exceptionHandling;
 
+import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.ChangingConstraintViolationException;
+import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.NoSuchEntityPresentException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,7 @@ public class CommonExceptionHandler {
                 .errors(errors)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -53,7 +55,7 @@ public class CommonExceptionHandler {
                 .errors(errors)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -65,7 +67,7 @@ public class CommonExceptionHandler {
                 .errors(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(TransactionSystemException.class)
@@ -81,7 +83,8 @@ public class CommonExceptionHandler {
                 .message("Transaction error: " + exception.getMessage())
                 .errors(null)
                 .build();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(NullPointerException.class)
@@ -93,7 +96,31 @@ public class CommonExceptionHandler {
                 .errors(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(apiError);
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
+    }
+
+    @ExceptionHandler(NoSuchEntityPresentException.class)
+    public ResponseEntity<ApiError> handleEntityAbsenceException(NoSuchEntityPresentException exception){
+        ApiError apiError = ApiError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND)
+                .message(exception.getMessage())
+                .errors(null)
+                .build();
+
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
+    }
+
+    @ExceptionHandler(ChangingConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleEntityAbsenceException(ChangingConstraintViolationException exception){
+        ApiError apiError = ApiError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .message(exception.getMessage())
+                .errors(null)
+                .build();
+
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(Exception.class)
@@ -106,6 +133,6 @@ public class CommonExceptionHandler {
                 .errors(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 }

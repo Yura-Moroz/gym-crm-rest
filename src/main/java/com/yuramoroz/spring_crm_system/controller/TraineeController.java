@@ -11,6 +11,13 @@ import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 import com.yuramoroz.spring_crm_system.service.TraineeService;
 import com.yuramoroz.spring_crm_system.views.TraineeViews;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -22,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Tag(name = "Trainee Controller", description = "Endpoints for managing trainee profiles")
 @RequestMapping("/gym-api/trainees")
 @RestController
 @Validated
@@ -33,18 +40,41 @@ public class TraineeController {
 
     private final ConversionService conversionService;
 
-
+    @Operation(summary = "Create a new trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Profile created successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TraineeDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @PostMapping
     @JsonView(TraineeViews.Login.class)
-    public ResponseEntity<TraineeDto> createProfile(@RequestBody @Valid
-                                                    @JsonView(TraineeViews.Input.class) TraineeDto traineeDto) {
+    public ResponseEntity<TraineeDto> createProfile(
+            @Parameter(description = "Trainee details for creation", required = true)
+            @RequestBody
+            @Valid
+            @JsonView(TraineeViews.Input.class) TraineeDto traineeDto) {
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(conversionService.convert(traineeService.save(traineeDto), TraineeDto.class));
     }
 
-
+    @Operation(summary = "Change password for a trainee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @PutMapping("/password")
-    public ResponseEntity<String> changePassword(@RequestBody @Valid UserLoginDto userLoginDto) {
+    public ResponseEntity<String> changePassword(
+            @Parameter(description = "User login details containing old and new passwords", required = true)
+            @RequestBody @Valid UserLoginDto userLoginDto) {
+
         Trainee trainee = traineeService.getByUsername(userLoginDto.getUserName()).get();
 
         PasswordChangingResult result = traineeService.changePassword(trainee, userLoginDto.getOldPassword(), userLoginDto.getNewPassword());
@@ -53,38 +83,86 @@ public class TraineeController {
                 new ResponseEntity<>(result.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-
+    @Operation(summary = "Retrieve a trainee profile by username")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile retrieved successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TraineeDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @GetMapping("/{username}")
     @JsonView(TraineeViews.GetResp.class)
-    public ResponseEntity<TraineeDto> getProfileByUsername(@PathVariable String username) {
+    public ResponseEntity<TraineeDto> getProfileByUsername(
+            @Parameter(description = "Username of the trainee", required = true)
+            @PathVariable String username) {
+
         TraineeDto profileDto = conversionService.convert(traineeService.getByUsername(username).get(), TraineeDto.class);
         return ResponseEntity.ok(profileDto);
     }
 
-
+    @Operation(summary = "Update an existing trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TraineeDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @PutMapping("/{id}")
     @JsonView(TraineeViews.UpdateResp.class)
-    public ResponseEntity<TraineeDto> updateProfile(@PathVariable long id,
-                                                    @RequestBody @Valid
-                                                    @JsonView(TraineeViews.UpdateReq.class) TraineeDto traineeUpdatingDto) {
-        Trainee trainee = traineeService.getById(id).get();
+    public ResponseEntity<TraineeDto> updateProfile(
+            @Parameter(description = "ID of the trainee to update", required = true)
+            @PathVariable long id,
+            @Parameter(description = "Updated trainee details", required = true)
+            @RequestBody @Valid
+            @JsonView(TraineeViews.UpdateReq.class) TraineeDto traineeUpdatingDto) {
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(conversionService.convert(traineeService.update(trainee, traineeUpdatingDto), TraineeDto.class));
+                .body(conversionService.convert(traineeService.update(id, traineeUpdatingDto), TraineeDto.class));
     }
 
 
+    @Operation(summary = "Delete a trainee profile by username")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+
+    })
     @DeleteMapping("/{username}")
-    public ResponseEntity<Void> deleteProfile(@PathVariable String username) {
+    public ResponseEntity<Void> deleteProfile(
+            @Parameter(description = "Username of the trainee to delete", required = true)
+            @PathVariable String username) {
         traineeService.deleteByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
+    @Operation(summary = "Update trainings list for a trainee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainings updated successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TrainingDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @PutMapping("/{username}/update-trainings")
     @JsonView(TrainingViews.UpdateTraineeTrainings.class)
-    public ResponseEntity<List<TrainingDto>> updateTrainingsList(@PathVariable String username,
-                                                                 @RequestBody @Valid
-                                                                 List<TrainingAddingDto> trainingsDto) {
+    public ResponseEntity<List<TrainingDto>> updateTrainingsList(
+            @Parameter(description = "Username of the trainee", required = true)
+            @PathVariable String username,
+            @Parameter(description = "List of trainings to update", required = true)
+            @RequestBody @Valid
+            List<TrainingAddingDto> trainingsDto) {
+
         Trainee trainee = traineeService.getByUsername(username).get();
         List<Training> newTrainings = trainingsDto.stream()
                 .map(trainingDto -> conversionService.convert(trainingDto, Training.class)).collect(Collectors.toList());
@@ -99,10 +177,19 @@ public class TraineeController {
     }
 
 
+    @Operation(summary = "Toggle the active status of a trainee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status toggled successfully", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @PatchMapping("/status")
-    public ResponseEntity<Void> changeStatus(@RequestBody
-                                             @Valid
-                                             @JsonView(TraineeViews.Status.class) TraineeDto traineeDto) {
+    public ResponseEntity<Void> changeStatus(
+            @Parameter(description = "Trainee details with username for status update", required = true)
+            @RequestBody @Valid
+            @JsonView(TraineeViews.Status.class) TraineeDto traineeDto) {
         Trainee trainee = traineeService.getByUsername(traineeDto.getUserName()).get();
         if (trainee.isActive()) traineeService.deactivate(trainee);
         else traineeService.activate(trainee);

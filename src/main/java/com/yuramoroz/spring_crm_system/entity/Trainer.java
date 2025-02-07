@@ -21,6 +21,6 @@ public class Trainer extends User{
     @Column(name = "specialization", nullable = false)
     private String specialization;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany
     private List<Training> trainings;
 }

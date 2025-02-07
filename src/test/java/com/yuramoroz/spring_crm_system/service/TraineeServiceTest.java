@@ -1,7 +1,6 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
-import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
@@ -12,12 +11,11 @@ import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.core.convert.ConversionService;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +28,9 @@ public class TraineeServiceTest {
 
     @Mock
     private TraineeDao traineeDao;
+
+    @Mock
+    private ConversionService conversionService;
 
     @InjectMocks
     private TraineeServiceImpl traineeService;
@@ -45,6 +46,7 @@ public class TraineeServiceTest {
                 .lastName("Doe")
                 .password("password123")
                 .address("123 Street")
+                .userName("test.trainee")
                 .dateOfBirth(LocalDate.of(1990, 1, 1))
                 .build();
     }
@@ -57,27 +59,20 @@ public class TraineeServiceTest {
                 .lastName("Johnson")
                 .password("rockPass")
                 .address("123 Street")
+                .password("qwerrogpjhewr")
                 .dateOfBirth(LocalDate.of(1972, 5, 2))
                 .build();
+        try (MockedStatic<PasswordHandler> mockedStatic = Mockito.mockStatic(PasswordHandler.class)) {
+            mockedStatic.when(() -> PasswordHandler.verify(anyString())).thenReturn(true);
+            when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
+            when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
+            when(conversionService.convert(traineeDto, Trainee.class)).thenReturn(trainee);
 
-        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
+            Trainee savedTrainee = traineeService.save(traineeDto);
 
-        Trainee savedTrainee = traineeService.save(traineeDto);
-
-        verify(traineeDao, times(1)).ifExistByUsername(anyString());
-        verify(traineeDao, times(1)).save(any(Trainee.class));
-    }
-
-    @Test
-    void saveTraineeWithOneParam_shouldSaveTraineeSuccessfully() {
-        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
-
-        Trainee savedTrainee = traineeService.save(trainee);
-
-        verify(traineeDao, times(1)).ifExistByUsername(anyString());
-        verify(traineeDao, times(1)).save(any(Trainee.class));
+            verify(traineeDao, times(1)).ifExistByUsername(anyString());
+            verify(traineeDao, times(1)).save(any(Trainee.class));
+        }
     }
 
     @Test
@@ -159,20 +154,23 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void updateTraineeTest(){
+    void updateTraineeTest() {
         TraineeDto traineeDto = TraineeDto.builder()
                 .id(1L)
                 .firstName("Dwayne")
                 .lastName("Johnson")
                 .password("rockPass")
                 .address("123 Street")
+                .userName("test.trainee")
                 .dateOfBirth(LocalDate.of(1972, 5, 2))
                 .build();
 
         when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
         when(traineeDao.update(trainee)).thenReturn(trainee);
+        when(conversionService.convert(traineeDto, Trainee.class)).thenReturn(trainee);
+        when(traineeDao.getById(1L)).thenReturn(Optional.of(trainee));
 
-        Trainee updatedTrainee = traineeService.update(trainee, traineeDto);
+        Trainee updatedTrainee = traineeService.update(1L, traineeDto);
 
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
         verify(traineeDao, times(1)).update(trainee);

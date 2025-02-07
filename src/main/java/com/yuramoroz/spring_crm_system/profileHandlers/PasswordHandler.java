@@ -1,11 +1,13 @@
 package com.yuramoroz.spring_crm_system.profileHandlers;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordHandler {
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static String hashPassword(String password) {
+        if(!verify(password)) throw new IllegalArgumentException("Password should be 4-10 chars in length");
         return passwordEncoder.encode(password);
     }
 

@@ -9,7 +9,7 @@ public interface TrainerService extends BaseUserService<Trainer>{
 
     public Trainer save(TrainerDto trainerDto);
 
-    public Trainer update(Trainer trainer, TrainerDto trainerDto);
+    public Trainer update(long id, TrainerDto trainerDto);
 
     public List<Trainer> getUnassignedTrainersToUserByUsername(String username);
 

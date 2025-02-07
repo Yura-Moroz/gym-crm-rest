@@ -11,7 +11,7 @@ public interface TraineeService extends BaseUserService<Trainee> {
 
     public Trainee save(TraineeDto traineeDto);
 
-    public Trainee update(Trainee trainee, TraineeDto traineeDto);
+    public Trainee update(long id, TraineeDto traineeDto);
 
     public void deleteByUsername(String username);
 

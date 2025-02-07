@@ -78,21 +78,21 @@ class TrainingControllerTest {
 
     @Test
     void addTraining_Success() throws Exception {
-        //When
         when(addingDtoToTrainingConverter.convert(any(TrainingAddingDto.class)))
                 .thenReturn(training);
         when(trainingService.save(any(Training.class))).thenReturn(training);
 
         String jsonInput = objectMapper.writeValueAsString(trainingAddingDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.post("/gym-api/trainings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(jsonInput))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().string(""));
 
+        //Then
         verify(addingDtoToTrainingConverter, times(1)).convert(any(TrainingAddingDto.class));
         verify(trainingService, times(1)).save(any(Training.class));
     }
@@ -110,9 +110,10 @@ class TrainingControllerTest {
         List<Training> trainingList = List.of(training, training2);
         when(trainingService.getAll()).thenReturn(trainingList);
 
-        // Then:
+        //When:
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainings/types")
                         .accept(MediaType.APPLICATION_JSON))
+                //Then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.FITNESS").value(TrainingType.FITNESS.ordinal()))
                 .andExpect(jsonPath("$.STRETCHING").value(TrainingType.STRETCHING.ordinal()));
@@ -127,10 +128,9 @@ class TrainingControllerTest {
                 any(), any(), eq("trainer.one"), eq(TrainingType.FITNESS)))
                 .thenReturn(trainingList);
 
-        // When:
         when(trainingDtoConverter.convert(any(Training.class))).thenReturn(trainingDto);
 
-        // Then:
+        // When:
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainings/trainee-trainings-date-range")
                         .param("username", "john.doe")
                         .param("trainer-username", "trainer.one")
@@ -141,6 +141,7 @@ class TrainingControllerTest {
                 .andExpect(jsonPath("$[0].trainingName").value("Fitness"))
                 .andExpect(jsonPath("$[0].type").value("FITNESS"));
 
+        //Then
         verify(trainingService, times(1))
                 .getTrainingsByTraineeUsernameAndDateRange(eq("john.doe"), any(), any(), eq("trainer.one"), eq(TrainingType.FITNESS));
         verify(trainingDtoConverter, times(1)).convert(any(Training.class));
@@ -154,7 +155,7 @@ class TrainingControllerTest {
                 any(), any(), eq("trainer.one"), eq(TrainingType.FITNESS)))
                 .thenReturn(List.of());
 
-        // Then:
+        // When:
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainings/trainee-trainings-date-range")
                         .param("username", "john.doe")
                         .param("trainer-username", "trainer.one")
@@ -163,6 +164,7 @@ class TrainingControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(""));
 
+        //Then
         verify(trainingService, times(1)).getTrainingsByTraineeUsernameAndDateRange(
                 eq("john.doe"), any(), any(), eq("trainer.one"), eq(TrainingType.FITNESS)
         );
@@ -179,7 +181,7 @@ class TrainingControllerTest {
 
         when(trainingDtoConverter.convert(any(Training.class))).thenReturn(trainingDto);
 
-        // Then:
+        // When:
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainings/trainer-trainings-date-range")
                         .param("username", "trainer.one")
                         .param("trainee-username", "john.doe")
@@ -190,6 +192,7 @@ class TrainingControllerTest {
                 .andExpect(jsonPath("$[0].trainingName").value("Fitness"))
                 .andExpect(jsonPath("$[0].type").value("FITNESS"));
 
+        //Then
         verify(trainingService, times(1))
                 .getTrainingsByTrainerUsernameAndDateRange(eq("trainer.one"), any(), any(), eq("john.doe"), eq(TrainingType.FITNESS));
         verify(trainingDtoConverter, times(1)).convert(any(Training.class));
@@ -203,7 +206,7 @@ class TrainingControllerTest {
                 any(), any(), eq("john.doe"), eq(TrainingType.FITNESS)))
                 .thenReturn(List.of());
 
-        // Then:
+        // When:
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainings/trainer-trainings-date-range")
                         .param("username", "trainer.one")
                         .param("trainee-username", "john.doe")
@@ -212,6 +215,7 @@ class TrainingControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(""));
 
+        //Then
         verify(trainingService, times(1)).getTrainingsByTrainerUsernameAndDateRange(
                 eq("trainer.one"), any(), any(), eq("john.doe"), eq(TrainingType.FITNESS)
         );

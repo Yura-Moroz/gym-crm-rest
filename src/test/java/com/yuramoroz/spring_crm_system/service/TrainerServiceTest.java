@@ -1,6 +1,7 @@
 package com.yuramoroz.spring_crm_system.service;
 
 import com.yuramoroz.spring_crm_system.dto.trainers.TrainerDto;
+import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TrainerDao;
@@ -8,6 +9,7 @@ import com.yuramoroz.spring_crm_system.service.impl.TrainerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.core.convert.ConversionService;
 
 import java.util.Optional;
 
@@ -21,6 +23,9 @@ public class TrainerServiceTest {
 
     @Mock
     private TrainerDao trainerDao;
+
+    @Mock
+    private ConversionService conversionService;
 
     @InjectMocks
     private TrainerServiceImpl trainerService;
@@ -54,24 +59,17 @@ public class TrainerServiceTest {
                 .specialization("Lying")
                 .build();
 
-        when(trainerDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(trainerDao.save(any(Trainer.class))).thenReturn(trainer);
+        try (MockedStatic<PasswordHandler> mockedStatic = Mockito.mockStatic(PasswordHandler.class)) {
+            mockedStatic.when(() -> PasswordHandler.verify(anyString())).thenReturn(true);
+            when(trainerDao.ifExistByUsername(anyString())).thenReturn(false);
+            when(trainerDao.save(any(Trainer.class))).thenReturn(trainer);
+            when(conversionService.convert(trainerDto, Trainer.class)).thenReturn(trainer);
 
-        Trainer savedTrainer = trainerService.save(trainerDto);
+            Trainer savedTrainer = trainerService.save(trainerDto);
 
-        verify(trainerDao, times(1)).ifExistByUsername(anyString());
-        verify(trainerDao, times(1)).save(any(Trainer.class));
-    }
-
-    @Test
-    void saveTrainerWithOneParam_shouldSaveTrainerSuccessfully() {
-        when(trainerDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(trainerDao.save(any(Trainer.class))).thenReturn(trainer);
-
-        Trainer savedTrainer = trainerService.save(trainer);
-
-        verify(trainerDao, times(1)).ifExistByUsername(anyString());
-        verify(trainerDao, times(1)).save(any(Trainer.class));
+            verify(trainerDao, times(1)).ifExistByUsername(anyString());
+            verify(trainerDao, times(1)).save(any(Trainer.class));
+        }
     }
 
     @Test
@@ -103,9 +101,9 @@ public class TrainerServiceTest {
     void updateTrainerTest() {
         TrainerDto trainerUpdatingDto = TrainerDto.builder()
                 .id(1L)
-                .firstName("Jimmy")
-                .lastName("Page")
-                .userName("Jimmy.Page")
+                .firstName("Conor")
+                .lastName("Mcgregor")
+                .userName("Conor.Mcgregor")
                 .password("page1099")
                 .active(true)
                 .specialization("Lying")
@@ -113,8 +111,10 @@ public class TrainerServiceTest {
 
         when(trainerDao.ifExistById(trainer.getId())).thenReturn(true);
         when(trainerDao.update(trainer)).thenReturn(trainer);
+        when(conversionService.convert(trainerUpdatingDto, Trainer.class)).thenReturn(trainer);
+        when(trainerDao.getById(1L)).thenReturn(Optional.of(trainer));
 
-        Trainer updatedTrainer = trainerService.update(trainer, trainerUpdatingDto);
+        Trainer updatedTrainer = trainerService.update(1L, trainerUpdatingDto);
 
         verify(trainerDao, times(1)).ifExistById(trainer.getId());
         verify(trainerDao, times(1)).update(trainer);

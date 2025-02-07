@@ -80,6 +80,7 @@ public class TraineeControllerTest {
                 .firstName("John")
                 .lastName("Doe")
                 .userName("john.doe")
+                .password("password123")
                 .active(true)
                 .address("123 Main St")
                 .dateOfBirth(LocalDate.of(1990, 1, 1))
@@ -91,6 +92,7 @@ public class TraineeControllerTest {
         when(traineeService.save(any(TraineeDto.class))).thenReturn(trainee);
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
+        //When
         mockMvc.perform(MockMvcRequestBuilders.post("/gym-api/trainees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -98,6 +100,7 @@ public class TraineeControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userName").value("john.doe"));
 
+        //Then
         verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
         verify(traineeService, times(1)).save(any(TraineeDto.class));
     }
@@ -107,12 +110,14 @@ public class TraineeControllerTest {
         when(traineeService.getByUsername("john.doe")).thenReturn(Optional.of(trainee));
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
+        //When
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainees/john.doe")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"));
 
+        //Then
         verify(traineeService, times(1)).getByUsername("john.doe");
         verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
     }
@@ -120,9 +125,10 @@ public class TraineeControllerTest {
     @Test
     void shouldUpdateTraineeProfile() throws Exception {
         when(traineeService.getById(1L)).thenReturn(Optional.of(trainee));
-        when(traineeService.update(any(Trainee.class), any(TraineeDto.class))).thenReturn(trainee);
+        when(traineeService.update(anyLong(), any(TraineeDto.class))).thenReturn(trainee);
         when(toTraineeDtoConverter.convert(any(Trainee.class))).thenReturn(traineeDto);
 
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -130,25 +136,31 @@ public class TraineeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"));
 
-        verify(traineeService, times(1)).getById(1L);
-        verify(traineeService, times(1)).update(any(Trainee.class), any(TraineeDto.class));
+        //Then
+        verify(traineeService, times(1)).update(anyLong(), any(TraineeDto.class));
         verify(toTraineeDtoConverter, times(1)).convert(any(Trainee.class));
     }
 
     @Test
     void shouldDeleteTraineeProfile() throws Exception {
+        //When
         mockMvc.perform(MockMvcRequestBuilders.delete("/gym-api/trainees/john.doe"))
                 .andExpect(status().isOk());
+
+        //Then
+        verify(traineeService, times(1)).deleteByUsername("john.doe");
     }
 
     @Test
     void shouldChangePassword() throws Exception {
+        //Given
         UserLoginDto loginDto = new UserLoginDto("john.doe", "oldPass", "newPass");
         PasswordChangingResult result = new PasswordChangingResult(true, "Password changed successfully");
 
         when(traineeService.getByUsername("john.doe")).thenReturn(Optional.of(trainee));
         when(traineeService.changePassword(any(Trainee.class), any(), any())).thenReturn(result);
 
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -156,6 +168,7 @@ public class TraineeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Password changed successfully"));
 
+        //Then
         verify(traineeService, times(1)).getByUsername("john.doe");
         verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
     }
@@ -166,18 +179,18 @@ public class TraineeControllerTest {
         UserLoginDto loginDto = new UserLoginDto("user", "wrongOldPass", "newPass");
         Trainee trainee = new Trainee();
 
-        //When
         when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
         when(traineeService.changePassword(any(), any(), any())).thenReturn(
                 new PasswordChangingResult(false, "Sorry, It seems that you've provided wrong old password"));
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Sorry, It seems that you've provided wrong old password"));
 
+        //Then
         verify(traineeService, times(1)).getByUsername("user");
         verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
     }
@@ -188,18 +201,18 @@ public class TraineeControllerTest {
         UserLoginDto loginDto = new UserLoginDto("user", "oldPassword", "InvalidNewPass");
         Trainee trainee = new Trainee();
 
-        //When
         when(traineeService.getByUsername("user")).thenReturn(Optional.of(trainee));
         when(traineeService.changePassword(any(), any(), any())).thenReturn(
                 new PasswordChangingResult(false, "Please check that your new password meets all requirements (length should be 4-10 chars)"));
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Please check that your new password meets all requirements (length should be 4-10 chars)"));
 
+        //Then
         verify(traineeService, times(1)).getByUsername("user");
         verify(traineeService, times(1)).changePassword(any(Trainee.class), any(), any());
     }
@@ -208,26 +221,28 @@ public class TraineeControllerTest {
     void shouldChangeTraineeStatus() throws Exception {
         when(traineeService.getByUsername("john.doe")).thenReturn(Optional.of(trainee));
 
+        //When
         mockMvc.perform(MockMvcRequestBuilders.patch("/gym-api/trainees/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(traineeDto)))
                 .andExpect(status().isOk());
 
+        //Then
         verify(traineeService, times(1)).getByUsername("john.doe");
     }
 
     @Test
     void getProfileByUsername_NotFound() throws Exception {
-        //When
         when(traineeService.getByUsername("nonexistent")).thenReturn(Optional.empty());
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainees/nonexistent")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("The user was not found"));
 
+        //Then
         verify(traineeService, times(1)).getByUsername("nonexistent");
     }
 
@@ -253,7 +268,6 @@ public class TraineeControllerTest {
                         .build()
         );
 
-        // When
         when(traineeService.getByUsername(any())).thenReturn(Optional.of(trainee));
         when(traineeService.updateTrainings(any(Trainee.class), any())).thenReturn(trainee);
         when(toTrainingDtoConverter.convert(any(Training.class))).thenReturn(
@@ -266,7 +280,7 @@ public class TraineeControllerTest {
                         .build()
         );
 
-        // Then
+        // When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainees/john.doe/update-trainings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(trainingDtos)))
@@ -277,6 +291,7 @@ public class TraineeControllerTest {
                 .andExpect(jsonPath("$[0].date").value("2025-03-17T16:00:00"))
                 .andExpect(jsonPath("$[0].duration").value("PT1H30M"));
 
+        // Then
         verify(traineeService, times(1)).getByUsername(any());
         verify(traineeService, times(1)).updateTrainings(any(Trainee.class), any());
         verify(toTrainingDtoConverter, times(1)).convert(any(Training.class));

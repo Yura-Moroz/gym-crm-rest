@@ -2,9 +2,12 @@ package com.yuramoroz.spring_crm_system.service.impl;
 
 import com.yuramoroz.spring_crm_system.dto.trainers.TrainerDto;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
+import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.ChangingConstraintViolationException;
+import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.NoSuchEntityPresentException;
 import com.yuramoroz.spring_crm_system.repository.TrainerDao;
 import com.yuramoroz.spring_crm_system.service.TrainerService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +16,11 @@ import java.util.List;
 @Slf4j
 public class TrainerServiceImpl extends BaseUserServiceImpl<Trainer, TrainerDao> implements TrainerService {
 
-    public TrainerServiceImpl(TrainerDao repository) {
+    private final ConversionService conversionService;
+
+    public TrainerServiceImpl(TrainerDao repository, ConversionService conversionService) {
         super(repository);
+        this.conversionService = conversionService;
     }
 
     @Override
@@ -22,30 +28,28 @@ public class TrainerServiceImpl extends BaseUserServiceImpl<Trainer, TrainerDao>
         if (trainerDto == null) throw new IllegalArgumentException("The user cannot be null");
         log.info("Trying to create and save {} {} trainer...", trainerDto.getFirstName(), trainerDto.getLastName());
 
-        Trainer trainer = Trainer.builder()
-                .firstName(trainerDto.getFirstName())
-                .lastName(trainerDto.getLastName())
-                .password(trainerDto.getPassword())
-                .specialization(trainerDto.getSpecialization())
-                .build();
-
-        return super.save(trainer);
+        return super.save(conversionService.convert(trainerDto, Trainer.class));
     }
 
     @Override
-    public Trainer update(Trainer trainer, TrainerDto trainerUpdatingDto) {
+    public Trainer update(long id, TrainerDto trainerUpdatingDto) {
         log.info("Trying to update Trainer profile");
-        if (trainerUpdatingDto == null || trainer == null) throw new IllegalArgumentException("Can't update the user with null entity");
 
-        if(repository.ifExistById(trainer.getId())) {
-            trainer.setFirstName(trainerUpdatingDto.getFirstName());
-            trainer.setLastName(trainerUpdatingDto.getLastName());
-            trainer.setUserName(trainerUpdatingDto.getUserName());
-            trainer.setActive(trainerUpdatingDto.isActive());
-
-            return repository.update(trainer);
+        if (!repository.ifExistById(id)) {
+            throw new NoSuchEntityPresentException("There is no trainer with id: " + id);
         }
-        throw new IllegalArgumentException("There is no user with id: " + trainer.getId());
+
+        Trainer oldTrainer = repository.getById(id).get();
+        Trainer updatedTrainer = conversionService.convert(trainerUpdatingDto, Trainer.class);
+        updatedTrainer.setId(id);
+        updatedTrainer.setPassword(repository.getById(id).get().getPassword());
+
+        if(!oldTrainer.getUserName().equals(updatedTrainer.getUserName())){
+            throw new ChangingConstraintViolationException("The username cannot be changed! ");
+        }
+
+        return repository.update(updatedTrainer);
+
     }
 
     @Override

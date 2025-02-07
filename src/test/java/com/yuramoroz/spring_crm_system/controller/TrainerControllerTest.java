@@ -69,22 +69,22 @@ public class TrainerControllerTest {
 
     @Test
     void createProfile_Success() throws Exception {
-        //When
         when(trainerService.save(any(TrainerDto.class))).thenReturn(trainer);
-        when(toTrainerDtoConverter.convert(any(Trainer.class)))
-                .thenReturn(trainerDto);
+        when(toTrainerDtoConverter.convert(any(Trainer.class))).thenReturn(trainerDto);
 
-        String jsonInput = objectMapper
-                .writerWithView(TrainerViews.Input.class)
-                .writeValueAsString(trainerDto);
+        String jsonInput = objectMapper.writeValueAsString(trainerDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.post("/gym-api/trainers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(jsonInput))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userName").value("peter.pranker"));
+
+        //Then
+        verify(trainerService, times(1)).save(any(TrainerDto.class));
+        verify(toTrainerDtoConverter, times(1)).convert(any(Trainer.class));
     }
 
     @Test
@@ -98,11 +98,10 @@ public class TrainerControllerTest {
 
         PasswordChangingResult result = new PasswordChangingResult(true, "Password changed successfully");
 
-        //When
         when(trainerService.getByUsername("peter.pranker")).thenReturn(Optional.of(trainer));
         when(trainerService.changePassword(any(Trainer.class), any(), any())).thenReturn(result);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainers/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -110,6 +109,7 @@ public class TrainerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Password changed successfully"));
 
+        //Then
         verify(trainerService, times(1)).getByUsername("peter.pranker");
         verify(trainerService, times(1)).changePassword(any(Trainer.class), anyString(), anyString());
     }
@@ -125,11 +125,10 @@ public class TrainerControllerTest {
 
         PasswordChangingResult result = new PasswordChangingResult(false, "Wrong old password");
 
-        //When
         when(trainerService.getByUsername("peter.pranker")).thenReturn(Optional.of(trainer));
         when(trainerService.changePassword(any(Trainer.class), anyString(), anyString())).thenReturn(result);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainers/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -137,17 +136,17 @@ public class TrainerControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Wrong old password"));
 
+        //Then
         verify(trainerService, times(1)).getByUsername("peter.pranker");
         verify(trainerService, times(1)).changePassword(any(Trainer.class), anyString(), anyString());
     }
 
     @Test
     void getProfileByUsername_Success() throws Exception {
-        //When
         when(trainerService.getByUsername("peter.pranker")).thenReturn(Optional.of(trainer));
         when(toTrainerDtoConverter.convert(any(Trainer.class))).thenReturn(trainerDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainers/peter.pranker")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -156,6 +155,7 @@ public class TrainerControllerTest {
                 .andExpect(jsonPath("$.active").value(true))
                 .andExpect(jsonPath("$.specialization").value("Powerlifting"));
 
+        //Then
         verify(trainerService, times(1)).getByUsername("peter.pranker");
         verify(toTrainerDtoConverter, times(1)).convert(any(Trainer.class));
     }
@@ -177,20 +177,20 @@ public class TrainerControllerTest {
                 .firstName("Peter")
                 .lastName("Pranker")
                 .userName("peter.updated")
+                .password("peterPass")
                 .active(false)
                 .specialization("Powerlifting")
                 .build();
 
-        //When
         when(trainerService.getById(1L)).thenReturn(Optional.of(trainer));
-        when(trainerService.update(any(Trainer.class), any(TrainerDto.class))).thenReturn(updatedTrainer);
+        when(trainerService.update(anyLong(), any(TrainerDto.class))).thenReturn(updatedTrainer);
         when(toTrainerDtoConverter.convert(any(Trainer.class))).thenReturn(updatedTrainerDto);
 
         String jsonInput = objectMapper
                 .writerWithView(TrainerViews.UpdatingReq.class)
                 .writeValueAsString(trainerDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.put("/gym-api/trainers/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -199,8 +199,8 @@ public class TrainerControllerTest {
                 .andExpect(jsonPath("$.userName").value("peter.updated"))
                 .andExpect(jsonPath("$.active").value(false));
 
-        verify(trainerService, times(1)).getById(1L);
-        verify(trainerService, times(1)).update(any(Trainer.class), any(TrainerDto.class));
+        //Then
+        verify(trainerService, times(1)).update(anyLong(), any(TrainerDto.class));
         verify(toTrainerDtoConverter, times(1)).convert(any(Trainer.class));
     }
 
@@ -225,37 +225,37 @@ public class TrainerControllerTest {
                 .specialization("Bodybuilding")
                 .build();
 
-        //When
         when(trainerService.getUnassignedTrainersToUserByUsername("peter.pranker"))
                 .thenReturn(List.of(unassignedTrainer));
         when(toTrainerDtoConverter.convert(any(Trainer.class))).thenReturn(unassignedTrainerDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.get("/gym-api/trainers/peter.pranker/unassigned")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].userName").value("alex.smith"));
 
+        //Then
         verify(toTrainerDtoConverter, times(1)).convert(any(Trainer.class));
         verify(trainerService, times(1)).getUnassignedTrainersToUserByUsername("peter.pranker");
     }
 
     @Test
     void changeStatus_Success() throws Exception {
-        //When
         when(trainerService.getByUsername("peter.pranker")).thenReturn(Optional.of(trainer));
         String jsonInput = objectMapper
                 .writerWithView(TrainerViews.Status.class)
                 .writeValueAsString(trainerDto);
 
-        //Then
+        //When
         mockMvc.perform(MockMvcRequestBuilders.patch("/gym-api/trainers/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(jsonInput))
                 .andExpect(status().isOk());
 
+        //Then
         verify(trainerService, times(1)).getByUsername("peter.pranker");
     }
 }

@@ -1,6 +1,6 @@
-package com.yuramoroz.spring_crm_system.converters;
+package com.yuramoroz.spring_crm_system.converters.traineeConverters;
 
-import com.yuramoroz.spring_crm_system.dto.TraineeDto;
+import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.core.convert.converter.Converter;

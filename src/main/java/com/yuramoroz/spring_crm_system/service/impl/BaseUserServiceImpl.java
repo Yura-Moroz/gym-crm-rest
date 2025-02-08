@@ -2,7 +2,7 @@ package com.yuramoroz.spring_crm_system.service.impl;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
-import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
+import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.UserDao;
 import com.yuramoroz.spring_crm_system.service.BaseUserService;
 import com.yuramoroz.spring_crm_system.utils.ProfileUtils;
@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -52,17 +51,17 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         String resultMessage;
 
         if (user == null) {
-            resultMessage = "Can't change password when user is null";
+            resultMessage = "Can't change password when the user is null";
         } else if (!PasswordHandler.ifPasswordMatches(oldPassword, user.getPassword())) {
-            resultMessage = "Sorry, It seems that you provided wrong old password";
+            resultMessage = "Sorry, It seems that you've provided wrong old password";
         } else if (!PasswordHandler.verify(newPassword)) {
             resultMessage = "Please check that your new password meets all requirements (length should be 4-10 chars)";
         } else if (!repository.ifExistById(user.getId())) {
             resultMessage = "Sorry, can't change password because provided user doesn't exist...";
         } else {
             user.setPassword(PasswordHandler.hashPassword(newPassword));
-            update(user);
-            resultMessage = "New password successfully set to user";
+            repository.update(user);
+            resultMessage = "New password was successfully set to the user";
             succeed = true;
         }
 
@@ -70,17 +69,6 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
                 .succeed(succeed)
                 .message(resultMessage)
                 .build();
-    }
-
-    @Override
-    @Transactional
-    public T update(T user) {
-        log.info("Updating user");
-        if (repository.ifExistById(user.getId())) {
-            return repository.update(user);
-        } else {
-            throw new NoSuchElementException("This user was not found in DB");
-        }
     }
 
     @Override

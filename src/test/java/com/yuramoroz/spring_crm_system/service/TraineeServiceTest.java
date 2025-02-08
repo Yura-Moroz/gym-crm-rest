@@ -1,14 +1,22 @@
 package com.yuramoroz.spring_crm_system.service;
 
+import com.yuramoroz.spring_crm_system.dto.trainees.TraineeDto;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
-import com.yuramoroz.spring_crm_system.profile_handlers.PasswordHandler;
+import com.yuramoroz.spring_crm_system.entity.Trainer;
+import com.yuramoroz.spring_crm_system.entity.Training;
+import com.yuramoroz.spring_crm_system.enums.TrainingType;
+import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TraineeDao;
 import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.core.convert.ConversionService;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +28,9 @@ public class TraineeServiceTest {
 
     @Mock
     private TraineeDao traineeDao;
+
+    @Mock
+    private ConversionService conversionService;
 
     @InjectMocks
     private TraineeServiceImpl traineeService;
@@ -35,32 +46,33 @@ public class TraineeServiceTest {
                 .lastName("Doe")
                 .password("password123")
                 .address("123 Street")
+                .userName("test.trainee")
                 .dateOfBirth(LocalDate.of(1990, 1, 1))
                 .build();
     }
 
     @Test
     void saveTraineeWithMultiParam_shouldSaveTraineeSuccessfully() {
+        TraineeDto traineeDto = TraineeDto.builder()
+                .id(1L)
+                .firstName("Dwayne")
+                .lastName("Johnson")
+                .password("rockPass")
+                .address("123 Street")
+                .password("qwerrogpjhewr")
+                .dateOfBirth(LocalDate.of(1972, 5, 2))
+                .build();
+        try (MockedStatic<PasswordHandler> mockedStatic = Mockito.mockStatic(PasswordHandler.class)) {
+            mockedStatic.when(() -> PasswordHandler.verify(anyString())).thenReturn(true);
+            when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
+            when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
+            when(conversionService.convert(traineeDto, Trainee.class)).thenReturn(trainee);
 
-        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
+            Trainee savedTrainee = traineeService.save(traineeDto);
 
-        Trainee savedTrainee = traineeService.save(
-                "Matt", "Watson", "qwerty123", "456 Street", LocalDate.of(1980, 6, 19));
-
-        verify(traineeDao, times(1)).ifExistByUsername(anyString());
-        verify(traineeDao, times(1)).save(any(Trainee.class));
-    }
-
-    @Test
-    void saveTraineeWithOneParam_shouldSaveTraineeSuccessfully() {
-        when(traineeDao.ifExistByUsername(anyString())).thenReturn(false);
-        when(traineeDao.save(any(Trainee.class))).thenReturn(trainee);
-
-        Trainee savedTrainee = traineeService.save(trainee);
-
-        verify(traineeDao, times(1)).ifExistByUsername(anyString());
-        verify(traineeDao, times(1)).save(any(Trainee.class));
+            verify(traineeDao, times(1)).ifExistByUsername(anyString());
+            verify(traineeDao, times(1)).save(any(Trainee.class));
+        }
     }
 
     @Test
@@ -111,11 +123,54 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void updateTraineeTest() {
+    void updateTraineeTrainingsTest() {
+        Trainer trainerDustin = Trainer.builder()
+                .firstName("Dustin")
+                .lastName("Poirier")
+                .userName("Dustin.Poirier")
+                .password("qwerty456")
+                .active(true)
+                .specialization("MMA")
+                .build();
+
+        Training training = Training.builder()
+                .id(1L)
+                .trainingName("Calistenics")
+                .trainingDate(LocalDateTime.now())
+                .trainingType(TrainingType.CROSSFIT)
+                .trainingDuration(Duration.ofMinutes(75))
+                .trainee(trainee)
+                .trainer(trainerDustin)
+                .build();
+        List<Training> trainings = List.of(training);
+
         when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
         when(traineeDao.update(trainee)).thenReturn(trainee);
 
-        Trainee updatedTrainee = traineeService.update(trainee);
+        Trainee updatedTrainee = traineeService.updateTrainings(trainee, trainings);
+
+        verify(traineeDao, times(1)).ifExistById(trainee.getId());
+        verify(traineeDao, times(1)).update(trainee);
+    }
+
+    @Test
+    void updateTraineeTest() {
+        TraineeDto traineeDto = TraineeDto.builder()
+                .id(1L)
+                .firstName("Dwayne")
+                .lastName("Johnson")
+                .password("rockPass")
+                .address("123 Street")
+                .userName("test.trainee")
+                .dateOfBirth(LocalDate.of(1972, 5, 2))
+                .build();
+
+        when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
+        when(traineeDao.update(trainee)).thenReturn(trainee);
+        when(conversionService.convert(traineeDto, Trainee.class)).thenReturn(trainee);
+        when(traineeDao.getById(1L)).thenReturn(Optional.of(trainee));
+
+        Trainee updatedTrainee = traineeService.update(1L, traineeDto);
 
         verify(traineeDao, times(1)).ifExistById(trainee.getId());
         verify(traineeDao, times(1)).update(trainee);
@@ -162,7 +217,7 @@ public class TraineeServiceTest {
             traineeService.changePassword(trainee, oldPassword, newPassword);
 
             assertEquals(trainee.getPassword(), newPassword);
-            verify(traineeDao, times(2)).ifExistById(trainee.getId());
+            verify(traineeDao, times(1)).ifExistById(trainee.getId());
             verify(traineeDao, times(1)).update(trainee);
             mockedStatic.verify(() -> PasswordHandler.hashPassword(newPassword), times(1));
             mockedStatic.verify(() -> PasswordHandler.ifPasswordMatches(oldPassword, oldPassword), times(1));

@@ -15,8 +15,6 @@ public interface BaseUserService<T extends User> {
 
     public PasswordChangingResult changePassword(T user, String oldPassword, String newPassword);
 
-    public T update(T user);
-
     public boolean deactivate(T user);
 
     public boolean activate(T user);

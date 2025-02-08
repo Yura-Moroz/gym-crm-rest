@@ -1,13 +1,11 @@
 package com.yuramoroz.spring_crm_system;
 
-import com.yuramoroz.spring_crm_system.config.AppConfig;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Hello world!
- */
+@SpringBootApplication
 public class TrainingApp {
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        SpringApplication.run(TrainingApp.class, args);
     }
 }

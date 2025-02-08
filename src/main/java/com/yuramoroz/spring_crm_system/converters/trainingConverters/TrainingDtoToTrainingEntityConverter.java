@@ -1,6 +1,6 @@
-package com.yuramoroz.spring_crm_system.converters;
+package com.yuramoroz.spring_crm_system.converters.trainingConverters;
 
-import com.yuramoroz.spring_crm_system.dto.TrainingDto;
+import com.yuramoroz.spring_crm_system.dto.trainings.TrainingDto;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.core.convert.converter.Converter;
@@ -15,10 +15,10 @@ public class TrainingDtoToTrainingEntityConverter implements Converter<TrainingD
                 .id(trainingDto.getId())
                 .trainee(trainingDto.getTrainee())
                 .trainer(trainingDto.getTrainer())
-                .trainingDate(trainingDto.getTrainingDate())
+                .trainingDate(trainingDto.getDate())
                 .trainingName(trainingDto.getTrainingName())
-                .trainingDuration(trainingDto.getTrainingDuration())
-                .trainingType(trainingDto.getTrainingType())
+                .trainingDuration(trainingDto.getDuration())
+                .trainingType(trainingDto.getType())
                 .build();
     }
 }

@@ -13,6 +13,8 @@ public interface TrainingService {
 
     public Optional<Training> getById(long id);
 
+    public List<Training> getAll();
+
     public List<Training> getTrainingsByTraineeUsernameAndDateRange(
             String username, LocalDate dateFrom, LocalDate dateTo, String trainerName, TrainingType trainingType);
 

@@ -12,4 +12,5 @@ public enum TrainingType {
     CARDIO,
     CROSSFIT,
     FITNESS
+
 }

@@ -49,4 +49,10 @@ public class TrainingServiceImpl implements TrainingService {
         return trainingDao.getTrainingsByTrainerUsernameAndDateRange(trainerLogin, dateFrom, dateTo, traineeLogin, trainingType);
     }
 
+    @Override
+    public long getAllTrainingsCount(){
+        log.info("Retrieving trainings count");
+        return trainingDao.count();
+    }
+
 }

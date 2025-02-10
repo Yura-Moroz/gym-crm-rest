@@ -21,4 +21,5 @@ public interface TrainingService {
     public List<Training> getTrainingsByTrainerUsernameAndDateRange(
             String username, LocalDate dateFrom, LocalDate dateTo, String trainerName, TrainingType trainingType);
 
+    public long count();
 }

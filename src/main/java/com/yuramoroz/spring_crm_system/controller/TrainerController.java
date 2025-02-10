@@ -8,6 +8,7 @@ import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 import com.yuramoroz.spring_crm_system.service.TrainerService;
 import com.yuramoroz.spring_crm_system.views.TrainerViews;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,8 @@ public class TrainerController {
 
     private final ConversionService conversionService;
 
+    private final MeterRegistry meterRegistry;
+
     @Operation(summary = "Create a new trainer profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Profile created successfully",
@@ -52,6 +55,9 @@ public class TrainerController {
             @Parameter(description = "Trainer details for creation", required = true)
             @RequestBody @Valid
             @JsonView(TrainerViews.Input.class) TrainerDto trainerDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "POST /gym-api/trainers").increment();
+
         return ResponseEntity.status(HttpStatus.CREATED).
                 body(conversionService.convert(trainerService.save(trainerDto), TrainerDto.class));
     }
@@ -69,6 +75,9 @@ public class TrainerController {
     public ResponseEntity<String> changePassword(
             @Parameter(description = "User login details containing old and new passwords ", required = true)
             @RequestBody @Valid UserLoginDto userLoginDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "PUT /gym-api/trainers/password").increment();
+
         Trainer trainer = trainerService.getByUsername(userLoginDto.getUserName()).get();
         PasswordChangingResult result = trainerService.changePassword(trainer, userLoginDto.getOldPassword(), userLoginDto.getNewPassword());
         return result.isSucceed() ?
@@ -92,6 +101,9 @@ public class TrainerController {
     public ResponseEntity<TrainerDto> getProfileByUsername(
             @Parameter(description = "Username of the trainer", required = true)
             @PathVariable String username) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "GET /gym-api/trainers/{username}").increment();
+
         TrainerDto profileDto = conversionService.convert(trainerService.getByUsername(username).get(), TrainerDto.class);
         return ResponseEntity.ok(profileDto);
     }
@@ -116,6 +128,9 @@ public class TrainerController {
             @RequestBody
             @JsonView(TrainerViews.UpdatingReq.class)
             @Valid TrainerDto trainerUpdatingDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "PUT /gym-api/trainers/{id}").increment();
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(conversionService.convert(trainerService.update(id, trainerUpdatingDto), TrainerDto.class));
     }
@@ -135,6 +150,10 @@ public class TrainerController {
     public ResponseEntity<List<TrainerDto>> getUnassignedTrainersByTraineeUsername(
             @Parameter(description = "Username of the trainee to get unassigned trainers", required = true)
             @PathVariable String username) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "GET /gym-api/trainers/{username}/unassigned")
+                .increment();
+
         List<Trainer> unassignedTrainers = trainerService.getUnassignedTrainersToUserByUsername(username);
         List<TrainerDto> resultList = unassignedTrainers
                 .stream()
@@ -159,6 +178,9 @@ public class TrainerController {
             @RequestBody @Valid
             @JsonView(TrainerViews.Status.class)
             TrainerDto trainerDto) {
+
+        meterRegistry.counter("endpoint.trainer.calls", "endpoint", "PATCH /gym-api/trainers/status").increment();
+
         Trainer trainer = trainerService.getByUsername(trainerDto.getUserName()).get();
         if (trainer.isActive()) trainerService.deactivate(trainer);
         else trainerService.activate(trainer);

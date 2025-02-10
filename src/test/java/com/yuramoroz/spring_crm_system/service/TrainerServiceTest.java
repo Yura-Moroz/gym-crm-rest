@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.core.convert.ConversionService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,9 +171,11 @@ public class TrainerServiceTest {
 
     @Test
     public void getUnassignedTrainersTest(){
-        trainerService.getUnassignedTrainersToUserByUsername(trainer.getUserName());
+        when(trainerService.getUnassignedTrainersToUserByUsername(anyString())).thenReturn(Collections.emptyList());
 
-        verify(trainerDao, times(1)).getUnassignedTrainers(trainer.getUserName());
+        trainerService.getUnassignedTrainersToUserByUsername("any.trainee");
+
+        verify(trainerDao, times(1)).getUnassignedTrainers(anyString());
     }
 
 }

@@ -13,4 +13,6 @@ public interface BaseDao<T> {
 
     public boolean ifExistById(long id);
 
+    public long count();
+
 }

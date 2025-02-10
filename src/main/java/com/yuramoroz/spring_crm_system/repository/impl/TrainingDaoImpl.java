@@ -93,4 +93,12 @@ public class TrainingDaoImpl implements TrainingDao {
 
         return query.getResultList();
     }
+
+    @Override
+    public long count(){
+        log.info("Getting Training entities count from the DB");
+
+        String jpql = "SELECT COUNT(training) FROM Training training";
+        return (Long) entityManager.createQuery(jpql).getSingleResult();
+    }
 }

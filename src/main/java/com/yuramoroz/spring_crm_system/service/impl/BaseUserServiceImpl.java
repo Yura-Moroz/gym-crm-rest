@@ -96,7 +96,7 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
     }
 
     @Override
-    public long getAllUsersCount(){
+    public long count(){
         log.info("Getting users count");
         return repository.count();
     }

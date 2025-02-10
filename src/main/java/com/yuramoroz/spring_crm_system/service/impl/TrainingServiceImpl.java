@@ -50,7 +50,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    public long getAllTrainingsCount(){
+    public long count(){
         log.info("Retrieving trainings count");
         return trainingDao.count();
     }

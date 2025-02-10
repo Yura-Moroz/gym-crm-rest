@@ -1,5 +1,6 @@
 package com.yuramoroz.spring_crm_system.healthIndicators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -10,13 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class DatabaseFullHealthIndicator implements HealthIndicator {
 
     private final DataSource dataSource;
-
-    public DatabaseFullHealthIndicator(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     @Override
     public Health health() {

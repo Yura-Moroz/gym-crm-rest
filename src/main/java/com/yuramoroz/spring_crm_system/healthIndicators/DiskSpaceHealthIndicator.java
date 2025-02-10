@@ -1,5 +1,6 @@
 package com.yuramoroz.spring_crm_system.healthIndicators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -9,20 +10,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Component
+@RequiredArgsConstructor
 public class DiskSpaceHealthIndicator implements HealthIndicator {
 
     private final File path;
 
     private final long threshold;
 
-    // Default constructor: checks the current working directory with a 1GB threshold.
     public DiskSpaceHealthIndicator() {
         this(new File("."), 1073741824L);  // Default to 1GB threshold (in 1 GB there are 1073741824 bytes)
-    }
-
-    public DiskSpaceHealthIndicator(File path, long threshold) {
-        this.path = path;
-        this.threshold = threshold;
     }
 
     @Override

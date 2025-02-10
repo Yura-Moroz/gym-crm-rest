@@ -44,7 +44,7 @@ public class TrainerServiceImpl extends BaseUserServiceImpl<Trainer, TrainerDao>
         updatedTrainer.setId(id);
         updatedTrainer.setPassword(repository.getById(id).get().getPassword());
 
-        if(!oldTrainer.getUserName().equals(updatedTrainer.getUserName())){
+        if (!oldTrainer.getUserName().equals(updatedTrainer.getUserName())) {
             throw new ChangingConstraintViolationException("The username cannot be changed! ");
         }
 

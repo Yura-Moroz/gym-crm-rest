@@ -14,4 +14,6 @@ public interface TrainingDao extends BaseDao<Training> {
     public List<Training> getTrainingsByTrainerUsernameAndDateRange(
             String trainerLogin, LocalDate dateFrom, LocalDate dateTo, String traineeLogin, TrainingType trainingType);
 
+    public long count();
+
 }

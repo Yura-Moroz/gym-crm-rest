@@ -97,4 +97,12 @@ public abstract class UserDaoImpl<T extends User> implements UserDao<T> {
         return counter > 0;
     }
 
+    @Override
+    public long count(){
+        log.info("Getting " + clazz.getName() + " entities count from the DB");
+
+        String jpql = "SELECT COUNT(user) FROM " + clazz.getName() + " user";
+        return (Long) entityManager.createQuery(jpql).getSingleResult();
+    }
+
 }

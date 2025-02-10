@@ -7,6 +7,7 @@ import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.service.TrainingService;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,6 +39,7 @@ public class TrainingController {
 
     private final ConversionService conversionService;
 
+    private final MeterRegistry meterRegistry;
 
     @Operation(summary = "Create a new training")
     @ApiResponses(value = {
@@ -51,6 +53,9 @@ public class TrainingController {
     public ResponseEntity<Void> addTraining(@RequestBody
                                             @Valid
                                             TrainingAddingDto trainingDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "POST /gym-api/trainings").increment();
+
         trainingService.save(conversionService.convert(trainingDto, Training.class));
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
@@ -65,6 +70,8 @@ public class TrainingController {
     })
     @GetMapping("/types")
     public ResponseEntity<Map<String, Integer>> getTrainingTypes() {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "GET /gym-api/trainings/types").increment();
 
         Map<String, Integer> result = new HashMap<>();
         List<Training> trainings = trainingService.getAll();
@@ -103,6 +110,10 @@ public class TrainingController {
             @RequestParam(name = "trainer-username") String trainerUsername,
             @RequestParam(name = "type") TrainingType type) {
 
+        meterRegistry.counter("endpoint.calls", "endpoint",
+                "GET /gym-api/trainings/trainee-trainings-date-range")
+                .increment();
+
         List<Training> traineeTrainingsByCriteria = trainingService.getTrainingsByTraineeUsernameAndDateRange(
                 traineeUsername, dateFrom, dateTo, trainerUsername, type);
 
@@ -140,6 +151,10 @@ public class TrainingController {
             @RequestParam(name = "date-to", required = false) LocalDate dateTo,
             @RequestParam(name = "trainee-username") String traineeUsername,
             @RequestParam(name = "type") TrainingType type) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint",
+                        "GET /gym-api/trainings/trainer-trainings-date-range")
+                .increment();
 
         List<Training> trainerTrainingsByCriteria = trainingService.getTrainingsByTrainerUsernameAndDateRange(
                 trainerUsername, dateFrom, dateTo, traineeUsername, type);

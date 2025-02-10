@@ -21,4 +21,6 @@ public interface BaseUserService<T extends User> {
 
     public void delete(T user);
 
+    public long count();
+
 }

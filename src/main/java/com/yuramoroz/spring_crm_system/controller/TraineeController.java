@@ -11,6 +11,7 @@ import com.yuramoroz.spring_crm_system.model.PasswordChangingResult;
 import com.yuramoroz.spring_crm_system.service.TraineeService;
 import com.yuramoroz.spring_crm_system.views.TraineeViews;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,6 +41,9 @@ public class TraineeController {
 
     private final ConversionService conversionService;
 
+    private final MeterRegistry meterRegistry;
+
+
     @Operation(summary = "Create a new trainee profile")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Profile created successfully",
@@ -58,6 +62,8 @@ public class TraineeController {
             @Valid
             @JsonView(TraineeViews.Input.class) TraineeDto traineeDto) {
 
+        meterRegistry.counter("endpoint.calls", "endpoint", "POST /gym-api/trainees").increment();
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(conversionService.convert(traineeService.save(traineeDto), TraineeDto.class));
     }
@@ -74,6 +80,8 @@ public class TraineeController {
     public ResponseEntity<String> changePassword(
             @Parameter(description = "User login details containing old and new passwords", required = true)
             @RequestBody @Valid UserLoginDto userLoginDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "PUT /gym-api/trainees/password").increment();
 
         Trainee trainee = traineeService.getByUsername(userLoginDto.getUserName()).get();
 
@@ -99,6 +107,9 @@ public class TraineeController {
             @Parameter(description = "Username of the trainee", required = true)
             @PathVariable String username) {
 
+        meterRegistry.counter("endpoint.calls", "endpoint", "GET /gym-api/trainees/{username}")
+                .increment();
+
         TraineeDto profileDto = conversionService.convert(traineeService.getByUsername(username).get(), TraineeDto.class);
         return ResponseEntity.ok(profileDto);
     }
@@ -122,6 +133,8 @@ public class TraineeController {
             @RequestBody @Valid
             @JsonView(TraineeViews.UpdateReq.class) TraineeDto traineeUpdatingDto) {
 
+        meterRegistry.counter("endpoint.calls", "endpoint", "PUT /gym-api/trainees/{id}").increment();
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(conversionService.convert(traineeService.update(id, traineeUpdatingDto), TraineeDto.class));
     }
@@ -140,6 +153,10 @@ public class TraineeController {
     public ResponseEntity<Void> deleteProfile(
             @Parameter(description = "Username of the trainee to delete", required = true)
             @PathVariable String username) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "DELETE /gym-api/trainees/{username}")
+                .increment();
+
         traineeService.deleteByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -162,6 +179,9 @@ public class TraineeController {
             @Parameter(description = "List of trainings to update", required = true)
             @RequestBody @Valid
             List<TrainingAddingDto> trainingsDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "PUT /gym-api/trainees/{username}/update-trainings")
+                .increment();
 
         Trainee trainee = traineeService.getByUsername(username).get();
         List<Training> newTrainings = trainingsDto.stream()
@@ -190,6 +210,9 @@ public class TraineeController {
             @Parameter(description = "Trainee details with username for status update", required = true)
             @RequestBody @Valid
             @JsonView(TraineeViews.Status.class) TraineeDto traineeDto) {
+
+        meterRegistry.counter("endpoint.calls", "endpoint", "PATCH /gym-api/trainees/status").increment();
+
         Trainee trainee = traineeService.getByUsername(traineeDto.getUserName()).get();
         if (trainee.isActive()) traineeService.deactivate(trainee);
         else traineeService.activate(trainee);

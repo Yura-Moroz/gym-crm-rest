@@ -95,4 +95,10 @@ public abstract class BaseUserServiceImpl<T extends User, R extends UserDao<T>> 
         repository.delete(user);
     }
 
+    @Override
+    public long count(){
+        log.info("Getting users count");
+        return repository.count();
+    }
+
 }

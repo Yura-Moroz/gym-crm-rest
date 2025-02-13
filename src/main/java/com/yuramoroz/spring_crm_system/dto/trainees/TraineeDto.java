@@ -36,7 +36,7 @@ public class TraineeDto {
     private String password;
 
     @NotNull
-    @JsonView({TraineeViews.UpdateReq.class, TraineeViews.GetResp.class, TraineeViews.Status.class})
+    @JsonView({TraineeViews.UpdateReq.class, TraineeViews.GetResp.class, TraineeViews.Status.class, TraineeViews.Input.class})
     private boolean active;
 
     @NotNull

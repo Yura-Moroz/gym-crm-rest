@@ -123,6 +123,8 @@ public class CommonExceptionHandler {
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAllExceptions(Exception exception) {
 

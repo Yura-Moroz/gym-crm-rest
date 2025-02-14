@@ -28,19 +28,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         String username = loginRequest.getUserName();
-        // Check if the user is blocked
         if (bruteForceProtectionService.isBlocked(username)) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body("User is temporarily blocked due to multiple failed login attempts. Try again later.");
+                    .body("User is temporarily blocked due to multiple failed login attempts. Please, try again later.");
         }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            loginRequest.getPassword()
-                    )
-            );
-
+                    new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword()));
             // On successful authentication, reset failed attempts
             bruteForceProtectionService.loginSucceeded(username);
             SecurityContextHolder.getContext().setAuthentication(authentication);

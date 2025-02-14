@@ -35,6 +35,10 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    /**
+     * Parses the token (assuming it is a JWS, i.e., a signed JWT) and validates the signature and claims (such as expiration).
+     * If the token is invalid (bad signature, expired, malformed, etc.), one of the exceptions in the catch block will be thrown.
+     */
     public boolean validateToken(String authToken) {
         try {
             Jwts.parser()

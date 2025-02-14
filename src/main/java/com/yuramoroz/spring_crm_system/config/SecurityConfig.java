@@ -1,7 +1,7 @@
 package com.yuramoroz.spring_crm_system.config;
 
-import com.yuramoroz.spring_crm_system.security.BruteForceProtectionService;
-import com.yuramoroz.spring_crm_system.security.CustomUserDetailsService;
+import com.yuramoroz.spring_crm_system.service.security.impl.BruteForceProtectionService;
+import com.yuramoroz.spring_crm_system.service.security.impl.CustomUserDetailsService;
 import com.yuramoroz.spring_crm_system.security.JwtAuthenticationFilter;
 import com.yuramoroz.spring_crm_system.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +32,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtTokenProvider tokenProvider;
+    private final BruteForceProtectionService bruteForceProtectionService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,7 +41,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
+        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService, bruteForceProtectionService);
     }
 
     @Bean
@@ -51,6 +52,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.POST, "/gym-api/trainees", "/gym-api/trainers", "/auth/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
+                        .requestMatchers("/actuator/metrics/**", "/actuator/health/**", "/actuator/prometheus/**").permitAll()
                         .anyRequest().authenticated()
                 )
 

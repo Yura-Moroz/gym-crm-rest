@@ -1,4 +1,4 @@
-package com.yuramoroz.spring_crm_system.security;
+package com.yuramoroz.spring_crm_system.service.security.impl;
 
 import com.yuramoroz.spring_crm_system.entity.User;
 import com.yuramoroz.spring_crm_system.service.TraineeService;
@@ -28,16 +28,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (optionalUser.isEmpty()) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
-        User appUser = optionalUser.get();
+        User user = optionalUser.get();
 
         return new org.springframework.security.core.userdetails.User(
-                appUser.getUserName(),
-                appUser.getPassword(),
-                appUser.isActive(), // enabled flag
-                true,  // accountNonExpired
-                true,  // credentialsNonExpired
-                true,  // accountNonLocked
-                Collections.emptyList()  // no authorities
+                user.getUserName(),
+                user.getPassword(),
+                Collections.emptyList()
         );
     }
 }

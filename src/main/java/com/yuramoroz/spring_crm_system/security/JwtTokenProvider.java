@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${security.jwt.secret-key}")
@@ -27,6 +29,7 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(UserDetails userDetails) {
+        log.info("Generating new token");
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -40,14 +43,15 @@ public class JwtTokenProvider {
      * If the token is invalid (bad signature, expired, malformed, etc.), one of the exceptions in the catch block will be thrown.
      */
     public boolean validateToken(String authToken) {
+        log.info("Validating provided token: " + authToken);
         try {
             Jwts.parser()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(authToken);
             return true;
-        } catch (JwtException | IllegalArgumentException ex) {
-            //TODO
+        } catch (JwtException e) {
+            log.error(e.getMessage());
         }
         return false;
     }

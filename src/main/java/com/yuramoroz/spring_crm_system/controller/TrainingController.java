@@ -45,6 +45,7 @@ public class TrainingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "New training created successfully", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
             @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
@@ -64,6 +65,7 @@ public class TrainingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved all training types from the DB", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
             @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
@@ -97,6 +99,7 @@ public class TrainingController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = TrainingDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
             @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
@@ -139,6 +142,7 @@ public class TrainingController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = TrainingDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
             @ApiResponse(responseCode = "406", description = "Not Acceptable", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)

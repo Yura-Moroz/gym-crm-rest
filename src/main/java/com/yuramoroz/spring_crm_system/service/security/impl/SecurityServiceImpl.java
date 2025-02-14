@@ -5,6 +5,7 @@ import com.yuramoroz.spring_crm_system.dto.auth.LoginRequest;
 import com.yuramoroz.spring_crm_system.security.JwtTokenProvider;
 import com.yuramoroz.spring_crm_system.service.security.SecurityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,8 +16,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityServiceImpl implements SecurityService {
 
     private final AuthenticationManager authenticationManager;
@@ -51,13 +55,13 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public String logout(String authHeader) {
-        SecurityContextHolder.clearContext();
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring("Bearer ".length()).trim();
-            bruteForceProtectionService.blacklistToken(token);
-        }
-
-        return "Logout succeed";
+        return Optional.ofNullable(authHeader)
+                .filter(header -> header.startsWith("Bearer "))
+                .map(header -> header.substring("Bearer ".length()).trim())
+                .map(token -> {
+                    bruteForceProtectionService.blacklistToken(token);
+                    return "Logout succeed";
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing or invalid Authorization header"));
     }
 }

@@ -20,7 +20,7 @@ public class BruteForceProtectionService {
     private final Set<String> blacklist = ConcurrentHashMap.newKeySet();
 
     public void loginSucceeded(String key) {
-        log.info("Remove user's username from attempts if authenticated");
+        log.info("Removing user's username from attempts");
         attemptsCache.remove(key);
     }
 

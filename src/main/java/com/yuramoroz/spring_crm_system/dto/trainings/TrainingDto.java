@@ -1,12 +1,10 @@
 package com.yuramoroz.spring_crm_system.dto.trainings;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Duration;

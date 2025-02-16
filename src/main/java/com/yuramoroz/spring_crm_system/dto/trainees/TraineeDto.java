@@ -49,5 +49,5 @@ public class TraineeDto {
     private LocalDate dateOfBirth;
 
     @JsonView({TraineeViews.UpdateResp.class, TraineeViews.GetResp.class})
-    private List<Training> trainings = new ArrayList<>();
+    private List<Training> trainings;
 }

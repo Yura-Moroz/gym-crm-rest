@@ -24,7 +24,7 @@ public class Trainee extends User {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Training> trainings = new ArrayList<>();
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL)
+    private List<Training> trainings;
 
 }

@@ -5,8 +5,10 @@ import com.yuramoroz.spring_crm_system.entity.Trainee;
 import com.yuramoroz.spring_crm_system.entity.Trainer;
 import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
+import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.NoSuchEntityPresentException;
 import com.yuramoroz.spring_crm_system.profileHandlers.PasswordHandler;
 import com.yuramoroz.spring_crm_system.repository.TraineeDao;
+import com.yuramoroz.spring_crm_system.repository.TrainingDao;
 import com.yuramoroz.spring_crm_system.service.impl.TraineeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +18,8 @@ import org.springframework.core.convert.ConversionService;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +30,9 @@ public class TraineeServiceTest {
 
     @Mock
     private TraineeDao traineeDao;
+
+    @Mock
+    private TrainingDao trainingDao;
 
     @Mock
     private ConversionService conversionService;
@@ -123,34 +128,126 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void updateTraineeTrainingsTest() {
-        Trainer trainerDustin = Trainer.builder()
-                .firstName("Dustin")
-                .lastName("Poirier")
-                .userName("Dustin.Poirier")
-                .password("qwerty456")
-                .active(true)
-                .specialization("MMA")
-                .build();
+    void updateTrainings_whenTraineeIsNull_thenThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                traineeService.updateTrainings(null, Collections.emptyList())
+        );
+    }
 
-        Training training = Training.builder()
-                .id(1L)
-                .trainingName("Calistenics")
-                .trainingDate(LocalDateTime.now())
-                .trainingType(TrainingType.CROSSFIT)
-                .trainingDuration(Duration.ofMinutes(75))
-                .trainee(trainee)
-                .trainer(trainerDustin)
-                .build();
-        List<Training> trainings = List.of(training);
+    @Test
+    void updateTrainings_whenTraineeNotFound_thenThrowNoSuchEntityPresentException() {
+        Trainee trainee = new Trainee();
+        trainee.setId(1L);
+        when(traineeDao.ifExistById(1L)).thenReturn(false);
 
-        when(traineeDao.ifExistById(trainee.getId())).thenReturn(true);
-        when(traineeDao.update(trainee)).thenReturn(trainee);
+        assertThrows(NoSuchEntityPresentException.class, () ->
+                traineeService.updateTrainings(trainee, Collections.emptyList())
+        );
+    }
 
-        Trainee updatedTrainee = traineeService.updateTrainings(trainee, trainings);
+    @Test
+    void updateTrainings_whenTrainingDoesNotBelongToTrainee_thenThrowIllegalArgumentException() {
 
-        verify(traineeDao, times(1)).ifExistById(trainee.getId());
-        verify(traineeDao, times(1)).update(trainee);
+        Trainee trainee = new Trainee();
+        trainee.setId(1L);
+        when(traineeDao.ifExistById(1L)).thenReturn(true);
+
+        // Create a training that belongs to a different trainee (id 2).
+        Training training = new Training();
+        training.setId(null); // new training, so no id assigned
+        Trainee otherTrainee = new Trainee();
+        otherTrainee.setId(2L);
+        training.setTrainee(otherTrainee);
+
+        List<Training> trainings = Arrays.asList(training);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                traineeService.updateTrainings(trainee, trainings)
+        );
+    }
+
+    @Test
+    void updateTrainings_updateExistingCreateNewDeleteOthers() {
+        // --- SETUP ---
+        Long traineeId = 1L;
+        Trainee persistentTrainee = new Trainee();
+        persistentTrainee.setId(traineeId);
+
+        // Existing trainings in the DB:
+        // Training A with id 10 and Training B with id 20.
+        Training trainingA = new Training();
+        trainingA.setId(10L);
+        trainingA.setTrainee(persistentTrainee);
+        trainingA.setTrainingName("Old A");
+
+        Training trainingB = new Training();
+        trainingB.setId(20L);
+        trainingB.setTrainee(persistentTrainee);
+        trainingB.setTrainingName("Old B");
+
+        persistentTrainee.setTrainings(new ArrayList<>(Arrays.asList(trainingA, trainingB)));
+
+        when(traineeDao.ifExistById(traineeId)).thenReturn(true);
+        when(traineeDao.getById(traineeId)).thenReturn(Optional.of(persistentTrainee));
+        // When updating the trainee, just return the passed trainee.
+        when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Prepare trainings for updating:
+        // 1. For Training A: update it.
+        Training updateA = new Training();
+        updateA.setId(10L);
+        updateA.setTrainee(persistentTrainee);
+        updateA.setTrainingName("New A");
+        updateA.setTrainer(new Trainer());
+        updateA.setTrainingType(TrainingType.BOXES);
+        updateA.setTrainingDate(LocalDateTime.now());
+        updateA.setTrainingDuration(Duration.ofMinutes(60));
+
+        // 2. New training (Training C) with no id.
+        Training newTraining = new Training();
+        newTraining.setId(null);
+        newTraining.setTrainee(persistentTrainee);
+        newTraining.setTrainingName("New C");
+        newTraining.setTrainer(new Trainer());
+        newTraining.setTrainingType(TrainingType.STRETCHING);
+        newTraining.setTrainingDate(LocalDateTime.now());
+        newTraining.setTrainingDuration(Duration.ofMinutes(90));
+
+        List<Training> trainingsForUpdating = Arrays.asList(updateA, newTraining);
+
+        // Stub trainingDao.update: when updating Training A (id 10), return an updated instance.
+        when(trainingDao.update(argThat(training -> training.getId() != null && training.getId().equals(10L))))
+                .thenAnswer(invocation -> {
+                    Training training = invocation.getArgument(0);
+                    training.setTrainingName("New A");
+                    return training;
+                });
+
+        // Stub delete for trainingDao.delete (Training B, id 20).
+        doNothing().when(trainingDao).delete(argThat(training -> training.getId() != null && training.getId().equals(20L)));
+
+        // --- EXECUTE ---
+        Trainee updatedTrainee = traineeService.updateTrainings(persistentTrainee, trainingsForUpdating);
+
+        // ---VERIFY---
+        verify(trainingDao, times(1)).update(argThat(t -> t.getId().equals(10L)));
+        verify(trainingDao, times(1)).delete(argThat(t -> t.getId().equals(20L)));
+
+        // Verify that the updated trainee has exactly two trainings:
+        // the updated Training A and the new training.
+        assertEquals(2, updatedTrainee.getTrainings().size());
+        List<Long> trainingIds = updatedTrainee.getTrainings().stream()
+                .map(Training::getId)
+                .collect(Collectors.toList());
+        // Training A should have id 10; new training may remain null (or be generated later).
+        assertTrue(trainingIds.contains(10L));
+
+        // Check that the training names are as expected.
+        List<String> trainingNames = updatedTrainee.getTrainings().stream()
+                .map(Training::getTrainingName)
+                .collect(Collectors.toList());
+        assertTrue(trainingNames.contains("New A"));
+        assertTrue(trainingNames.contains("New C"));
     }
 
     @Test

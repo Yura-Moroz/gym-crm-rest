@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.yuramoroz.spring_crm_system.enums.TrainingType;
 import com.yuramoroz.spring_crm_system.views.TraineeViews;
 import com.yuramoroz.spring_crm_system.views.TrainerViews;
+import com.yuramoroz.spring_crm_system.views.TrainingViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -31,12 +32,12 @@ public class Training {
 
     @ManyToOne
     @JoinColumn(name = "trainee_id", nullable = false)
-    @JsonView({TraineeViews.GetResp.class, TrainerViews.GetResp.class})
+    @JsonView({TraineeViews.GetResp.class, TrainerViews.GetResp.class, TrainingViews.GetResp.class})
     private Trainee trainee;
 
     @ManyToOne
     @JoinColumn(name = "trainer_id", nullable = false)
-    @JsonView({TraineeViews.GetResp.class, TrainerViews.GetResp.class})
+    @JsonView({TraineeViews.GetResp.class, TrainerViews.GetResp.class, TrainingViews.GetResp.class})
     private Trainer trainer;
 
     @NotNull

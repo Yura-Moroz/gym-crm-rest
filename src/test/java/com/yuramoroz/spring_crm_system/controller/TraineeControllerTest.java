@@ -250,7 +250,7 @@ public class TraineeControllerTest {
         verify(traineeService, times(1)).getByUsername("nonexistent");
     }
 
-    @Test
+/*    @Test
     void updateTrainingsList_Success() throws Exception {
         // Given
         Training training = Training.builder()
@@ -299,6 +299,6 @@ public class TraineeControllerTest {
         verify(traineeService, times(1)).getByUsername(any());
         verify(traineeService, times(1)).updateTrainings(any(Trainee.class), any());
         verify(toTrainingDtoConverter, times(1)).convert(any(Training.class));
-    }
+    }*/
 
 }

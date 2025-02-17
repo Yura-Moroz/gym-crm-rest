@@ -21,6 +21,6 @@ public class Trainer extends User{
     @Column(name = "specialization", nullable = false)
     private String specialization;
 
-    @OneToMany
+    @OneToMany(mappedBy = "trainer")
     private List<Training> trainings;
 }

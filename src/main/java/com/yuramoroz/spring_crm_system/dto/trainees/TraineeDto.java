@@ -36,7 +36,7 @@ public class TraineeDto {
     private String password;
 
     @NotNull
-    @JsonView({TraineeViews.UpdateReq.class, TraineeViews.GetResp.class, TraineeViews.Status.class})
+    @JsonView({TraineeViews.UpdateReq.class, TraineeViews.GetResp.class, TraineeViews.Status.class, TraineeViews.Input.class})
     private boolean active;
 
     @NotNull
@@ -49,5 +49,5 @@ public class TraineeDto {
     private LocalDate dateOfBirth;
 
     @JsonView({TraineeViews.UpdateResp.class, TraineeViews.GetResp.class})
-    private List<Training> trainings = new ArrayList<>();
+    private List<Training> trainings;
 }

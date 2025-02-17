@@ -1,6 +1,5 @@
 package com.yuramoroz.spring_crm_system.profileHandlers;
 
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordHandler {

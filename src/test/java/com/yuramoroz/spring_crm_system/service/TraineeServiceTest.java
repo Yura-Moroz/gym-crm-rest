@@ -216,26 +216,22 @@ public class TraineeServiceTest {
         List<Training> trainingsForUpdating = Arrays.asList(updateA, newTraining);
 
         // Stub trainingDao.update: when updating Training A (id 10), return an updated instance.
-        when(trainingDao.update(argThat(training -> training.getId() != null && training.getId().equals(10L))))
+        when(trainingDao.update(argThat(training -> training.getId().equals(10L))))
                 .thenAnswer(invocation -> {
                     Training training = invocation.getArgument(0);
                     training.setTrainingName("New A");
                     return training;
                 });
 
-        // Stub delete for trainingDao.delete (Training B, id 20).
-        doNothing().when(trainingDao).delete(argThat(training -> training.getId() != null && training.getId().equals(20L)));
-
         // --- EXECUTE ---
         Trainee updatedTrainee = traineeService.updateTrainings(persistentTrainee, trainingsForUpdating);
 
         // ---VERIFY---
+        assertEquals(2, updatedTrainee.getTrainings().size());
         verify(trainingDao, times(1)).update(argThat(t -> t.getId().equals(10L)));
         verify(trainingDao, times(1)).delete(argThat(t -> t.getId().equals(20L)));
 
-        // Verify that the updated trainee has exactly two trainings:
         // the updated Training A and the new training.
-        assertEquals(2, updatedTrainee.getTrainings().size());
         List<Long> trainingIds = updatedTrainee.getTrainings().stream()
                 .map(Training::getId)
                 .collect(Collectors.toList());

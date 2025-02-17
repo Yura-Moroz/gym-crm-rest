@@ -250,7 +250,7 @@ public class TraineeControllerTest {
         verify(traineeService, times(1)).getByUsername("nonexistent");
     }
 
-/*    @Test
+    @Test
     void updateTrainingsList_Success() throws Exception {
         // Given
         Training training = Training.builder()
@@ -263,8 +263,8 @@ public class TraineeControllerTest {
 
         List<TrainingAddingDto> trainingDtos = List.of(
                 TrainingAddingDto.builder()
-                        .traineeUsername("john.doe")
-                        .trainerUsername("trainer.username")
+                        .traineeId(1L)
+                        .trainerId(1L)
                         .trainingName("Legs")
                         .date(LocalDateTime.of(2025, 3, 17, 16, 0, 0))
                         .duration(Duration.ofMinutes(90))
@@ -299,6 +299,6 @@ public class TraineeControllerTest {
         verify(traineeService, times(1)).getByUsername(any());
         verify(traineeService, times(1)).updateTrainings(any(Trainee.class), any());
         verify(toTrainingDtoConverter, times(1)).convert(any(Training.class));
-    }*/
+    }
 
 }

@@ -99,16 +99,8 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
                 throw new IllegalArgumentException("Training doesn't belong to the provided trainee");
             }
 
-            if (training.getId() == null) {
-                updatedTrainings.add(training);
-            } else {
-
-                Training updatedTraining = trainingDao.update(training);
-
-                updatedTrainings.add(updatedTraining);
-
-                trainingsForDeletion.remove(training.getId());
-            }
+            updatedTrainings.add(training);
+            trainingsForDeletion.remove(training.getId());
         }
 
         trainingsForDeletion.values().forEach(trainingDao::delete);

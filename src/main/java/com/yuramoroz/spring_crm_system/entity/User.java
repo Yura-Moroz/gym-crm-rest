@@ -1,6 +1,7 @@
 package com.yuramoroz.spring_crm_system.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.yuramoroz.spring_crm_system.views.TraineeViews;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +19,7 @@ public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView({TrainingViews.UpdateTraineeTrainings.class, TrainingViews.GetResp.class})
+    @JsonView({TrainingViews.UpdateTraineeTrainings.class, TrainingViews.GetResp.class, TraineeViews.GetResp.class})
     private Long id;
 
     @NotNull

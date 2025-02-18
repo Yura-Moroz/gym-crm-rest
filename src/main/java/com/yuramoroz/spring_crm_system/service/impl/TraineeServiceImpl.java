@@ -77,14 +77,15 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         }
 
         List<Training> validTrainings = trainingsForUpdating.stream()
-                .peek(training -> {
-                    if (!training.getTrainee().getId().equals(trainee.getId())) {
-                        throw new IllegalArgumentException("Training doesn't belong to the provided trainee");
-                    }
-                }).collect(Collectors.toList());
+                .filter(training -> training.getTrainee().getId().equals(trainee.getId()))
+                .collect(Collectors.toList());
+
+        if (validTrainings.size() != trainingsForUpdating.size()) {
+            throw new IllegalArgumentException("One or more trainings don't belong to the provided trainee " + trainee.getUserName());
+        }
 
         trainee.getTrainings().clear();
-        trainee.getTrainings().addAll(validTrainings);
+        trainee.getTrainings().addAll(trainingsForUpdating);
 
         return repository.update(trainee);
     }

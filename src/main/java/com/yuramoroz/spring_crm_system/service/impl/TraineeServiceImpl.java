@@ -13,10 +13,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -83,29 +80,25 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
         }
 
         // Put all trainings to map so that they will be deleted if not found in updating list
-        Map<Long, Training> trainingsForDeletion = new HashMap<>();
+        Set<Training> trainingsForDeletion = new HashSet<>();
         if (trainee.getTrainings() != null) {
             trainee.getTrainings().
                     stream()
                     .filter(training -> training.getId() != null)
-                    .forEach(training -> trainingsForDeletion.put(training.getId(), training));
+                    .forEach(trainingsForDeletion::add);
         }
-
-        List<Training> updatedTrainings = new ArrayList<>();
 
         for (Training training : trainingsForUpdating) {
 
             if (training.getTrainee() == null || !training.getTrainee().getId().equals(trainee.getId())) {
                 throw new IllegalArgumentException("Training doesn't belong to the provided trainee");
             }
-
-            updatedTrainings.add(training);
-            trainingsForDeletion.remove(training.getId());
+            trainingsForDeletion.remove(training);
         }
 
-        trainingsForDeletion.values().forEach(trainingDao::delete);
-
-        trainee.setTrainings(updatedTrainings);
+        trainee.getTrainings().clear();
+        trainee.getTrainings().addAll(trainingsForUpdating);
+        trainee.getTrainings().removeAll(trainingsForDeletion);
 
         return repository.update(trainee);
     }

@@ -32,9 +32,6 @@ public class TraineeServiceTest {
     private TraineeDao traineeDao;
 
     @Mock
-    private TrainingDao trainingDao;
-
-    @Mock
     private ConversionService conversionService;
 
     @InjectMocks
@@ -169,7 +166,7 @@ public class TraineeServiceTest {
     @Test
     void updateTrainings_updateExistingCreateNewDeleteOthers() {
         // --- SETUP ---
-        Long traineeId = 1L;
+        long traineeId = 1L;
         Trainee persistentTrainee = new Trainee();
         persistentTrainee.setId(traineeId);
 
@@ -220,7 +217,6 @@ public class TraineeServiceTest {
 
         // ---VERIFY---
         assertEquals(2, updatedTrainee.getTrainings().size());
-        verify(trainingDao, times(1)).delete(argThat(t -> t.getId().equals(20L)));
 
         // the updated Training A and the new training.
         List<Long> trainingIds = updatedTrainee.getTrainings().stream()

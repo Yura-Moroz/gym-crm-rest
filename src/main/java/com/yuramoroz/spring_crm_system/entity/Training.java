@@ -7,10 +7,7 @@ import com.yuramoroz.spring_crm_system.views.TrainerViews;
 import com.yuramoroz.spring_crm_system.views.TrainingViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Type;
 
 import java.time.Duration;
@@ -21,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "trainee")
 @Entity
 @Table(name = "trainings")
 public class Training {

@@ -56,8 +56,8 @@ class TrainingControllerTest {
     @BeforeEach
     void setUp() {
         trainingAddingDto = TrainingAddingDto.builder()
-                .traineeUsername("john.doe")
-                .trainerUsername("trainer.one")
+                .traineeId(1L)
+                .trainerId(1L)
                 .trainingName("Fitness")
                 .date(LocalDateTime.of(2025, 8, 12, 17, 15))
                 .duration(Duration.ofMinutes(45))

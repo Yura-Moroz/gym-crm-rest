@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TrainingDto {
 
-    @JsonView(TrainingViews.Hidden.class)
+    @JsonView({TrainingViews.GetResp.class, TrainingViews.UpdateTraineeTrainings.class})
     private Long id;
 
-    @JsonView({TrainingViews.GetTrainerResp.class})
+    @JsonView({TrainingViews.GetResp.class, TrainingViews.UpdateTraineeTrainings.class})
     private Trainee trainee;
 
-    @JsonView(TrainingViews.GetTraineeResp.class)
+    @JsonView({TrainingViews.GetResp.class, TrainingViews.UpdateTraineeTrainings.class})
     private Trainer trainer;
 
     @JsonView({TrainingViews.UpdateTraineeTrainings.class, TrainingViews.GetResp.class})

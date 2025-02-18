@@ -16,11 +16,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TrainingAddingDto {
 
-    @NotNull
-    private String traineeUsername;
+    private Long id;
 
     @NotNull
-    private String trainerUsername;
+    private long traineeId;
+
+    @NotNull
+    private long trainerId;
 
     @NotNull
     private String trainingName;

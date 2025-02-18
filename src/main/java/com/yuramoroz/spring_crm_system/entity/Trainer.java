@@ -1,10 +1,7 @@
 package com.yuramoroz.spring_crm_system.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -22,5 +19,6 @@ public class Trainer extends User{
     private String specialization;
 
     @OneToMany(mappedBy = "trainer")
-    private List<Training> trainings;
+    @Builder.Default
+    private List<Training> trainings = new ArrayList<>();
 }

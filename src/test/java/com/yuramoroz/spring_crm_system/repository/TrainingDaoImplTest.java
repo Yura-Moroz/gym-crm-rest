@@ -143,4 +143,31 @@ public class TrainingDaoImplTest {
 
         assertThat(trainings).containsExactlyInAnyOrder(training);
     }
+
+    @Test
+    public void deleteTrainingTest(){
+        Training newTraining = trainingDao.save(training);
+
+        trainingDao.delete(newTraining);
+
+        assertFalse(trainingDao.ifExistById(newTraining.getId()));
+    }
+
+    @Test
+    public void updateTrainingTest(){
+        String newName = "NewTestTrainingName";
+        TrainingType newType = TrainingType.BOXES;
+        LocalDateTime newDate = LocalDateTime.now().plusDays(5);
+
+        Training newTraining = trainingDao.save(training);
+        newTraining.setTrainingName(newName);
+        newTraining.setTrainingType(newType);
+        newTraining.setTrainingDate(newDate);
+
+        Training updatedTraining = trainingDao.update(newTraining);
+
+        assertEquals(updatedTraining.getTrainingName(), newName);
+        assertEquals(updatedTraining.getTrainingDate(), newDate);
+        assertEquals(updatedTraining.getTrainingType(), newType);
+    }
 }

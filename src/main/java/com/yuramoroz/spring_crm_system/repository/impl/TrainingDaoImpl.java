@@ -101,4 +101,16 @@ public class TrainingDaoImpl implements TrainingDao {
         String jpql = "SELECT COUNT(training) FROM Training training";
         return (Long) entityManager.createQuery(jpql).getSingleResult();
     }
+
+    public Training update(Training training) {
+        log.info("Updating Training with id: " + training.getId());
+        return entityManager.merge(training);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Training training){
+        log.info("Tying to delete Training");
+        entityManager.remove(training);
+    }
 }

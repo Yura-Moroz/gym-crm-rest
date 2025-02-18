@@ -125,13 +125,6 @@ public class TraineeServiceTest {
     }
 
     @Test
-    void updateTrainings_whenTraineeIsNull_thenThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                traineeService.updateTrainings(null, Collections.emptyList())
-        );
-    }
-
-    @Test
     void updateTrainings_whenTraineeNotFound_thenThrowNoSuchEntityPresentException() {
         Trainee trainee = new Trainee();
         trainee.setId(1L);

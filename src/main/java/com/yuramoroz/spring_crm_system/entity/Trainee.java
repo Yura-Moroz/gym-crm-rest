@@ -10,6 +10,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true, exclude = "trainings")
+@ToString(exclude = "trainings")
 @NoArgsConstructor
 @SuperBuilder
 @Entity

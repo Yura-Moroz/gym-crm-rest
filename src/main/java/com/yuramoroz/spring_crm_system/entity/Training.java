@@ -19,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(exclude = "trainee")
+@ToString(exclude = "trainee")
 @Entity
 @Table(name = "trainings")
 public class Training {

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -71,34 +72,19 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
     public Trainee updateTrainings(Trainee trainee, List<Training> trainingsForUpdating) {
         log.info("Trying to update trainings for Trainee");
 
-        if (trainee == null) {
-            throw new IllegalArgumentException("User can't be null!");
-        }
-
         if (!repository.ifExistById(trainee.getId())) {
             throw new NoSuchEntityPresentException("There is no user in DB with such id: " + trainee.getId());
         }
 
-        // Put all trainings to map so that they will be deleted if not found in updating list
-        Set<Training> trainingsForDeletion = new HashSet<>();
-        if (trainee.getTrainings() != null) {
-            trainee.getTrainings().
-                    stream()
-                    .filter(training -> training.getId() != null)
-                    .forEach(trainingsForDeletion::add);
-        }
-
-        for (Training training : trainingsForUpdating) {
-
-            if (training.getTrainee() == null || !training.getTrainee().getId().equals(trainee.getId())) {
-                throw new IllegalArgumentException("Training doesn't belong to the provided trainee");
-            }
-            trainingsForDeletion.remove(training);
-        }
+        List<Training> validTrainings = trainingsForUpdating.stream()
+                .peek(training -> {
+                    if (!training.getTrainee().getId().equals(trainee.getId())) {
+                        throw new IllegalArgumentException("Training doesn't belong to the provided trainee");
+                    }
+                }).collect(Collectors.toList());
 
         trainee.getTrainings().clear();
-        trainee.getTrainings().addAll(trainingsForUpdating);
-        trainee.getTrainings().removeAll(trainingsForDeletion);
+        trainee.getTrainings().addAll(validTrainings);
 
         return repository.update(trainee);
     }

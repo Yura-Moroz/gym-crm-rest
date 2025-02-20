@@ -6,15 +6,14 @@ import com.yuramoroz.spring_crm_system.entity.Training;
 import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.ChangingConstraintViolationException;
 import com.yuramoroz.spring_crm_system.exceptionHandling.exceptions.NoSuchEntityPresentException;
 import com.yuramoroz.spring_crm_system.repository.TraineeDao;
+import com.yuramoroz.spring_crm_system.repository.TrainingDao;
 import com.yuramoroz.spring_crm_system.service.TraineeService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,10 +21,12 @@ import java.util.stream.Collectors;
 public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao> implements TraineeService {
 
     private final ConversionService conversionService;
+    private final TrainingDao trainingDao;
 
-    public TraineeServiceImpl(TraineeDao repository, ConversionService conversionService) {
+    public TraineeServiceImpl(TraineeDao repository, ConversionService conversionService, TrainingDao trainingDao) {
         super(repository);
         this.conversionService = conversionService;
+        this.trainingDao = trainingDao;
     }
 
     @Override
@@ -67,22 +68,26 @@ public class TraineeServiceImpl extends BaseUserServiceImpl<Trainee, TraineeDao>
     }
 
     @Override
-    public Trainee updateTrainings(Trainee trainee, List<Training> trainings) {
+    @Transactional
+    public Trainee updateTrainings(Trainee trainee, List<Training> trainingsForUpdating) {
         log.info("Trying to update trainings for Trainee");
-
-        if (trainee == null || trainings.isEmpty()) {
-            throw new IllegalArgumentException("Cannot update Trainee trainings. Arguments can't be null");
-        }
 
         if (!repository.ifExistById(trainee.getId())) {
             throw new NoSuchEntityPresentException("There is no user in DB with such id: " + trainee.getId());
         }
 
-        trainee.setTrainings(trainings
-                .stream()
+        List<Training> validTrainings = trainingsForUpdating.stream()
                 .filter(training -> training.getTrainee().getId().equals(trainee.getId()))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        if (validTrainings.size() != trainingsForUpdating.size()) {
+            throw new IllegalArgumentException("One or more trainings don't belong to the provided trainee " + trainee.getUserName());
+        }
+
+        trainee.getTrainings().clear();
+        trainee.getTrainings().addAll(trainingsForUpdating);
 
         return repository.update(trainee);
     }
+
 }

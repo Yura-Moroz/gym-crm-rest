@@ -201,7 +201,6 @@ public class TraineeController {
                         .collect(Collectors.toList()));
     }
 
-
     @Operation(summary = "Toggle the active status of a trainee")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status toggled successfully", content = @Content),

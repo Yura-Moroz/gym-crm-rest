@@ -263,8 +263,8 @@ public class TraineeControllerTest {
 
         List<TrainingAddingDto> trainingDtos = List.of(
                 TrainingAddingDto.builder()
-                        .traineeUsername("john.doe")
-                        .trainerUsername("trainer.username")
+                        .traineeId(1L)
+                        .trainerId(1L)
                         .trainingName("Legs")
                         .date(LocalDateTime.of(2025, 3, 17, 16, 0, 0))
                         .duration(Duration.ofMinutes(90))

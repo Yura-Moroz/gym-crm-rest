@@ -16,4 +16,8 @@ public interface TrainingDao extends BaseDao<Training> {
 
     public long count();
 
+    public Training update(Training training);
+
+    public void delete(Training training);
+
 }

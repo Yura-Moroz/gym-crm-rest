@@ -105,7 +105,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @GetMapping("/trainee-trainings-date-range")
-    @JsonView(TrainingViews.GetTraineeResp.class)
+    @JsonView(TrainingViews.GetResp.class)
     public ResponseEntity<List<TrainingDto>> getTraineeTrainingsByDateRange(
             @RequestParam(name = "username") String traineeUsername,
             @RequestParam(name = "date-from", required = false) LocalDate dateFrom,
@@ -148,7 +148,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @GetMapping("/trainer-trainings-date-range")
-    @JsonView(TrainingViews.GetTrainerResp.class)
+    @JsonView(TrainingViews.GetResp.class)
     public ResponseEntity<List<TrainingDto>> getTrainerTrainingsDateRange(
             @RequestParam(name = "username") String trainerUsername,
             @RequestParam(name = "date-from", required = false) LocalDate dateFrom,
